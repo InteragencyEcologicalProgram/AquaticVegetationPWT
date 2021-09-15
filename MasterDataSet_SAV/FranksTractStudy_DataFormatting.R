@@ -6,10 +6,15 @@
 #Nick Rasmussen
 #nicholas.rasmussen@water.ca.gov
 
-#import data from sharepoint
-#most data are in tabs of excel files
-#some coordinates in GPX file
-#missing data for some years still
+#need to look closer at GPS coordinates 
+#for 2017-2020, do the Easting/Northing data from Excel match the 
+#Latitude/Longitude data from the GPX file?
+#Also, do the waypoint numbers from 2014-2016 match their counterparts from
+#2017-2020?
+
+#determine how to accurately include species that were included in notes section
+
+#confirm that the correct latin names are used for all the species codes
 
 # Packages
 library(tidyverse) #suite of data science tools
@@ -78,24 +83,14 @@ d20 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2020
 # Format data sets--------------
 # they all need to have same format to be combined
 
-#need to figure out GPS coodinates still
-#either figure out how to get eastings/northings into lat/long
-#or figure out how to read the gpx file properly (pretty close now)
-
 #format GPS coordinates for 2017-2020
-fgps17 <- gps17 %>% 
-  select(name,geometry) %>% 
-  extract(geometry, c('lat', 'lon'), '\\((.*), (.*)\\)', convert = TRUE) 
-
-sep <- cbind(fgps17, st_coordinates(fgps17))
-
-
-sepp <- extract(data = fgps17, col = geometry, into = c('lat', 'lon'), '\\((.*), (.*)\\)', convert = TRUE) 
-
-separated_coord <- fgps17  %>%
-  mutate(lat = unlist(map(geometry,1)),
-         long = unlist(map(geometry,2))
-         )
+fgps17 <- gps17 %>%
+  mutate(Latitude = unlist(map(gps17$geometry,2)),
+         Longitude = unlist(map(gps17$geometry,1)))%>% 
+  select(name,Latitude,Longitude) %>% 
+  st_set_geometry(NULL) %>% 
+  mutate(across(c("name"), as.numeric))
+#glimpse(fgps17)
 
 #format 2014
 fd14 <- d14 %>% 
@@ -104,8 +99,9 @@ fd14 <- d14 %>%
   add_column("date" = as.Date("2014-10-07", "%Y-%m-%d")
              ,"Leafy PW" = as.numeric(NA)
              , "American PW" = as.numeric(NA))%>% 
-  #rename column that differs from analogs in other df's
-  rename("Southern Naiad" = "Souther Naiad")
+  #rename columns that differs from analogs in other df's
+  rename("Southern Naiad" = "Souther Naiad"
+         ,"Egeria" = "Egeria Rating")
 #glimpse(fd14)  
 #Note: row_bind function will figure out which columns don't match among df's
 #so probably unnecessary to add the missing columns by hand (except date, of course)
@@ -115,13 +111,15 @@ fd15 <- d15 %>%
   #add the sampling date
   add_column("date" = as.Date("2015-10-13", "%Y-%m-%d"))%>% 
   #rename column that differs from analogs in other df's
-  rename("Southern Naiad" = "Souther Naiad")
+  rename("Southern Naiad" = "Souther Naiad"
+         ,"Egeria" = "Egeria Rating")
 #glimpse(fd15) 
 
 #format 2016
 fd16 <- d16 %>% 
   #add the sampling date
-  add_column("date" = as.Date("2016-10-03", "%Y-%m-%d")) 
+  add_column("date" = as.Date("2016-10-03", "%Y-%m-%d")) %>% 
+  rename("Egeria" = "Egeria Rating")
 #glimpse(fd16) 
 
 #format 2017
@@ -129,9 +127,9 @@ fd17 <- d17 %>%
   #add the sampling date
   add_column("date" = as.Date("2017-10-10", "%Y-%m-%d")) %>% 
   #rename column that differs from analogs in other df's
-  rename("Egeria" = "Egeria Rating") %>% 
+  rename("American PW"="Amerian PW","Egeria" = "Egeria Rating") %>% 
   #change type for some columns from logical to numeric
-  mutate(across(c("Amerian PW"), as.numeric))
+  mutate(across(c("American PW"), as.numeric))
 #includes column for "Nitella" while 2018-2020 don't; row_bind can handle this
 #glimpse(fd17)
 
@@ -140,15 +138,17 @@ fd18 <- d18 %>%
   #add the sampling date
   add_column("date" = as.Date("2018-10-02", "%Y-%m-%d")) %>% 
   #rename column that differs from analogs in other df's
-  rename("Egeria" = "Egeria Rating") %>% 
+  rename("American PW"="Amerian PW","Egeria" = "Egeria Rating") %>% 
   #change type for some columns from logical to numeric
-  mutate(across(c("Amerian PW"), as.numeric))
+  mutate(across(c("American PW"), as.numeric))
 #glimpse(fd18)
 
 #format 2019
 fd19 <- d19 %>% 
   #add the sampling date; don't have specific date
-  add_column("date" = as.Date("2019", "%Y"))
+  add_column("date" = as.Date("2019", "%Y")) %>% 
+  #rename column that differs from analogs in other df's
+  rename("American PW"="Amerian PW") 
 #includes column for "Total" and "P. berch" which other years don't have
 #also missing "Leafy PW"
 #row_bind can handle this
@@ -162,19 +162,18 @@ gps19 <- d19 %>%
 d20g <- left_join(d20,gps19)
 
 #see if any GPS coordinates failed to join properly
-sum(is.na(d20g$Easting)) #0
+#sum(is.na(d20g$Easting)) #0
 #looks good
 
 #format 2020
 fd20 <- d20g %>% 
   #add the sampling date
   add_column("date" = as.Date("2020-10-06", "%Y-%m-%d")) %>% 
+  #rename column that differs from analogs in other df's
+  rename("American PW"="Amerian PW") %>% 
   #change type for some columns from logical to numeric
-  mutate(across(c("CLP","Amerian PW"), as.numeric))
+  mutate(across(c("CLP","American PW"), as.numeric))
 #glimpse(fd20)  
-
-# Species---------------
-#P. berch: Potamogeton berchtoldii 
 
 # Combine data sets-----------------
 
@@ -196,11 +195,99 @@ sum(is.na(fd1416g$Latitude)) #100
 fd1720 <- bind_rows(fd17,fd18,fd19,fd20)
 #bind worked even though columns weren't all in same order across df's
 #and not all columns were shared across all df's
-glimpse(fd1720)
+#glimpse(fd1720)
 
-#convert eastings and northings to latitude and longitude for 2017-2020 data
+#join with df with latitude/longitude
+#need to figure out if lat/long and easting/northing data match
+#shared column has different names in the two df's
+fd1720g <- left_join(fd1720,fgps17, by = c("WYPT" = "name")) 
+
+#first look at structure of each
+#glimpse(fd1416g) 
+#glimpse(fd1720g)
+#looks like the former is a subset of columns of the later
+#and all analogous columns have identical names
+
+#combine data sets for all years
+all <-bind_rows(fd1416g,fd1720g)
+glimpse(all)
+
+#format the "other species" column
+
+# Making data frame with existing strings and their replacement
+tr <- data.frame(target = c("Nitella 1","Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
+                 replacement = c("Nitella_sp","Nitella_sp","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
+
+# Making the named replacement vector from tr
+replacements <- c(tr$replacement)
+names(replacements) <- c(tr$target)
+
+#now format the other species df
+other <- all %>% 
+  select("date","WYPT","Other Species") %>% 
+  rename("other_sp" = "Other Species") %>% 
+  #drop all rows with NA
+  drop_na() %>% #18 remaining
+  mutate(species = str_replace_all(other_sp,pattern = replacements)) %>% 
+  #add column to indicate that coverage is category 1 for all
+  #need to check with data author to see if this is accurate
+  add_column("rake_coverage" = as.numeric(1)) %>% 
+  select(-"other_sp")
+#glimpse(other)
+
+
+#clean up the master data set
+
+#create vector of species names that will be column headers for wide format df
+#this will be used during conversion from wide to long
+sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinatus","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_berchtoldii","Potamogeton_pusillus","Myriophyllum_spicatum") 
+
+all_cleaner <- all %>% 
+  #subset to just needed columns and reorder them
+  select("WYPT"
+         ,"date"
+         ,"Latitude"
+         ,"Longitude"
+         ,"Egeria"
+         ,"CLP"
+         ,"Coontail"
+         ,"Southern Naiad"
+         ,"Threadleaf PW"
+         ,"Sago"
+         ,"Elodea"
+         ,"Richardson's PW"
+         ,"Leafy PW"
+         ,"American PW"
+         ,"Nitella"  
+         ,"P. berch"        
+         ,"P.pus"          
+         ,"Milfoil"
+         ) %>% 
+  rename("Egeria_densa"="Egeria"
+         ,"Potamogeton_crispus"="CLP"
+         ,"Ceratophyllum_demersum"="Coontail"
+         ,"Najas_guadalupensis"="Southern Naiad"
+         ,"Stuckenia_filiformis"="Threadleaf PW"
+         ,"Stuckenia_pectinatus"="Sago"
+         ,"Elodea_canadensis"="Elodea"
+         ,"Potamogeton_richardsonii"="Richardson's PW"
+         ,"Potamogeton_foliosus"="Leafy PW"
+         ,"Potamogeton_nodosus"="American PW"
+         ,"Nitella_sp"="Nitella"  
+         ,"Potamogeton_berchtoldii"="P. berch"        
+         ,"Potamogeton_pusillus"="P.pus"          
+         ,"Myriophyllum_spicatum"="Milfoil"
+         ) %>% 
+  pivot_longer(all_of(sav_col), names_to = "species", values_to = "rake_coverage") %>% 
+  #drop all rows with NA
+  drop_na("rake_coverage") 
   
+#combine main df with "other species" df
+#glimpse(all_cleaner)
+#glimpse(other)
+all_complete <- bind_rows(all_cleaner,other)
+           
+                       
 
-
-
+ 
 
