@@ -3,25 +3,26 @@
 #Submersed aquatic vegetation
 #Franks Tract long term monitoring
 
+#sampling method (Caudill et al 2019)
+#weighted, double-headed, 0.33 m wide rake, which was dragged for ~ 3 m along the bottom
+
 #Nick Rasmussen
 #nicholas.rasmussen@water.ca.gov
 
 #need to look closer at GPS coordinates 
 #for 2017-2020, do the Easting/Northing data from Excel match the 
 #Latitude/Longitude data from the GPX file?
-#Also, do the waypoint numbers from 2014-2016 match their counterparts from
-#2017-2020?
 
 #determine how to accurately include species that were included in notes section
-
 #confirm that the correct latin names are used for all the species codes
+#make sure we have key to ordinal rake coverage categories
 
 # Packages
 library(tidyverse) #suite of data science tools
 library(readxl) #read excel files
 library(sf) #importing gpx file and converting to data frame
 
-# Read in the Data----------------------------------------------
+# Read in the data----------------------------------------------
 # Data set is on SharePoint site for the 
 # Delta Smelt Resiliency Strategy Aquatic Weed Control Action
 
@@ -34,11 +35,13 @@ sharepoint_path <- normalizePath(
   )
 )  
 
-#GPS coordinates for 2014-2016
-#this is only half of the 2015 waypoints though
+#GPS coordinates for 2014
+#these might also be the same ones for 2016 and half the ones for 2015
+#need to confirm this
 gps14 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2014.xlsx"), range="eGERIA!A1:C101")
 
 #GPS coordinates for 2017-2020
+#it is known that the same locations were sampled across these four years
 gps17 <- st_read(paste0(sharepoint_path,"./Franks Points.gpx"))
 #throws a warning but looks OK
 
@@ -57,31 +60,27 @@ d15 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2015
 #GPS coordinates in other tabs (i.e., eGERIA 2014, Richardson's pw 2014)
 d16 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2016.xlsx"), range="2016!A4:K49")
 
-#Data for 2017-2020 are collected at the same 100 waypoints each year 
-#and I have those waypoints
-
 #2017
 #collected 10/10/2017
-#GPS coordinates available and imported with SAV data
+#GPS coordinates available and imported with SAV data but different format from those for 2014
 d17 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2017.xlsx"), range="2017 Data!E4:U104")
 
 #2018
 #collected 10/2/2018
-#GPS coordinates available and imported with SAV data
+#GPS coordinates available and imported with SAV data but different format from those for 2014
 d18 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2018.xlsx"), range="2018 Data!E4:T104")
 
 #2019
 #says 10/2/2018 which was carried over from 2018 file
-#GPS coordinates available and imported with SAV data
+#GPS coordinates available and imported with SAV data but different format from those for 2014
 d19 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2019.xlsx"), range="2019 Data!E4:U104")
 
 #2020
 #collected 10/6/2020
-#no GPS coordinates 
+#no GPS coordinates in file
 d20 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2020.xlsx"), range="2020data!A4:N104")
 
 # Format data sets--------------
-# they all need to have same format to be combined
 
 #format GPS coordinates for 2017-2020
 fgps17 <- gps17 %>%
@@ -135,7 +134,7 @@ fd17 <- d17 %>%
 
 #format 2018
 fd18 <- d18 %>% 
-  #add the sampling date
+  #add the sampling date; excel file says 10/2/2018 but manuscript says 10/3/2018
   add_column("date" = as.Date("2018-10-02", "%Y-%m-%d")) %>% 
   #rename column that differs from analogs in other df's
   rename("American PW"="Amerian PW","Egeria" = "Egeria Rating") %>% 
@@ -175,6 +174,25 @@ fd20 <- d20g %>%
   mutate(across(c("CLP","American PW"), as.numeric))
 #glimpse(fd20)  
 
+# Examine GPS coordinates-------------
+
+#join 2014 and 2017 data sets to see if they match
+gps_comp <- full_join(gps14,fgps17, by = c("Label" = "name"))
+
+gps_cp <- gps_comp %>% 
+  rename(Latitude14 = Latitude.x
+         ,Longitude14 = Longitude.x
+         ,Latitude17 = Latitude.y
+         ,Longitude17 = Longitude.y
+         ) %>% 
+  mutate(lat_diff = Latitude14-Latitude17
+         ,lon_diff = Longitude14-Longitude17)
+#despite sharing some of the same site numbers, the coordinates do not match
+#between 2014 and 2017-2020
+
+#write the formatted data as csv on SharePoint
+#write_csv(gps_cp,file = paste0(sharepoint_path,"/FranksTract_CoordinatesComparison.csv"))
+
 # Combine data sets-----------------
 
 #combine 2014-2016
@@ -188,8 +206,7 @@ fd1416g <- left_join(fd1416,gps14, by = c("WYPT" = "Label"))
 
 #look at rows with NA for GPS coordinates
 #should just be half of the 2015 rows (n=100)
-sum(is.na(fd1416g$Latitude)) #100
-#as expected
+sum(is.na(fd1416g$Latitude)) #100 as expected
 
 #combine 2017-2020
 fd1720 <- bind_rows(fd17,fd18,fd19,fd20)
@@ -209,40 +226,48 @@ fd1720g <- left_join(fd1720,fgps17, by = c("WYPT" = "name"))
 #and all analogous columns have identical names
 
 #combine data sets for all years
-all <-bind_rows(fd1416g,fd1720g)
-glimpse(all)
+most <-bind_rows(fd1416g,fd1720g)
+#glimpse(most)
 
 #format the "other species" column
 
 # Making data frame with existing strings and their replacement
 tr <- data.frame(target = c("Nitella 1","Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
-                 replacement = c("Nitella_sp","Nitella_sp","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
+                 replacement = c("Nitella","Nitella","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
 
 # Making the named replacement vector from tr
 replacements <- c(tr$replacement)
 names(replacements) <- c(tr$target)
 
 #now format the other species df
-other <- all %>% 
+other <- most %>% 
   select("date","WYPT","Other Species") %>% 
   rename("other_sp" = "Other Species") %>% 
   #drop all rows with NA
   drop_na() %>% #18 remaining
-  mutate(species = str_replace_all(other_sp,pattern = replacements)) %>% 
+  #clean up species names
+  mutate(species1 = str_replace_all(other_sp,pattern = replacements)) %>%
+  #this taxa required a second round because there was so much variation in naming
+  mutate(species = str_replace_all(species1,"Nitella","Nitella_sp")) %>% 
   #add column to indicate that coverage is category 1 for all
   #need to check with data author to see if this is accurate
   add_column("rake_coverage" = as.numeric(1)) %>% 
-  select(-"other_sp")
+  #remove one unneeded row
+  filter(species!="Lots of algae") %>% 
+  #drop unnneeded columns
+  select(-c("other_sp","species1"))
 #glimpse(other)
 
+#write data to sharepoint folder
+#write_csv(other,file = paste0(sharepoint_path,"/FranksTract_RareTaxa.csv"))
 
-#clean up the master data set
+#clean up the (mostly) combined data set
 
 #create vector of species names that will be column headers for wide format df
 #this will be used during conversion from wide to long
 sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinatus","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_berchtoldii","Potamogeton_pusillus","Myriophyllum_spicatum") 
 
-all_cleaner <- all %>% 
+most_cleaner <- most %>% 
   #subset to just needed columns and reorder them
   select("WYPT"
          ,"date"
@@ -283,10 +308,35 @@ all_cleaner <- all %>%
   drop_na("rake_coverage") 
   
 #combine main df with "other species" df
-#glimpse(all_cleaner)
+#glimpse(most_cleaner)
 #glimpse(other)
-all_complete <- bind_rows(all_cleaner,other)
-           
+all_complete <- bind_rows(most_cleaner,other)
+
+#all unique taxa
+unique(all_complete$species)
+
+#look at observations for rare taxa
+berch <- all_complete %>% 
+  filter(species=="Potamogeton_berchtoldii")
+
+zost <- all_complete %>% 
+  filter(species=="Potamogeton_zosteriformis")
+
+pusl <- all_complete %>% 
+  filter(species=="Potamogeton_pusillus")
+
+#look at range of abundance scores
+range(all_complete$rake_coverage) #0.01 5.00
+hist(all_complete$rake_coverage)
+unique(all_complete$rake_coverage)
+rare <- all_complete %>% 
+  filter(rake_coverage < 1)
+#there is one sample with score of 0.01
+#presumably trace amounts of Nitella
+
+#add column to indicate which survey generated the data
+#finalize column headers
+#export this file back to sharepoint
                        
 
  
