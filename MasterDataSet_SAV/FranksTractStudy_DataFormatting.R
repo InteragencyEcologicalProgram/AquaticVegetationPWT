@@ -3,15 +3,33 @@
 #Submersed aquatic vegetation
 #Franks Tract long term monitoring
 
+#2021 data will be collected October 6th
+
 #sampling method (Caudill et al 2019)
 #weighted, double-headed, 0.33 m wide rake, which was dragged for ~ 3 m along the bottom
+
+#rake coverage scoring key
+#	1 = 1-19%
+#	2 = 20-39%
+#	3 = 40-59%
+#	4 = 60-79%
+#	5 = 80-100%
 
 #Nick Rasmussen
 #nicholas.rasmussen@water.ca.gov
 
+#check for useful notes in original excel files
+
+#has Franks Tract been treated every year of this survey?
+#based on Caudill et al 2019 (Table 1), all but 2009, 2013, and 2015 were treated during 2006-2017
+#what about 2018-2020?
+
 #need to look closer at GPS coordinates 
 #for 2017-2020, do the Easting/Northing data from Excel match the 
 #Latitude/Longitude data from the GPX file?
+
+#make sure that date x site combos with no SAV are preserved as rows
+#these most likely got automatically dropped during data set assembly process
 
 #determine how to accurately include species that were included in notes section
 #confirm that the correct latin names are used for all the species codes
@@ -35,9 +53,9 @@ sharepoint_path <- normalizePath(
   )
 )  
 
-#GPS coordinates for 2014
-#these might also be the same ones for 2016 and half the ones for 2015
-#need to confirm this
+#GPS coordinates for 2014 
+#data author confirmed that this is the same points used for 2016
+#the 2014 points overlap with the 2015 points but still 100 points for 2015 missing
 gps14 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2014.xlsx"), range="eGERIA!A1:C101")
 
 #GPS coordinates for 2017-2020
@@ -66,12 +84,13 @@ d16 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2016
 d17 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2017.xlsx"), range="2017 Data!E4:U104")
 
 #2018
-#collected 10/2/2018
+#excel file says 10/2/2018 but Jones & Thum 2021 says 10/3/2018
 #GPS coordinates available and imported with SAV data but different format from those for 2014
 d18 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2018.xlsx"), range="2018 Data!E4:T104")
 
 #2019
 #says 10/2/2018 which was carried over from 2018 file
+#data author said it was 10/1/2019
 #GPS coordinates available and imported with SAV data but different format from those for 2014
 d19 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2019.xlsx"), range="2019 Data!E4:U104")
 
@@ -134,7 +153,7 @@ fd17 <- d17 %>%
 
 #format 2018
 fd18 <- d18 %>% 
-  #add the sampling date; excel file says 10/2/2018 but manuscript says 10/3/2018
+  #add the sampling date
   add_column("date" = as.Date("2018-10-02", "%Y-%m-%d")) %>% 
   #rename column that differs from analogs in other df's
   rename("American PW"="Amerian PW","Egeria" = "Egeria Rating") %>% 
@@ -144,8 +163,8 @@ fd18 <- d18 %>%
 
 #format 2019
 fd19 <- d19 %>% 
-  #add the sampling date; don't have specific date
-  add_column("date" = as.Date("2019", "%Y")) %>% 
+  #add the sampling date
+  add_column("date" = as.Date("2019-10-01", "%Y-%m-%d")) %>% 
   #rename column that differs from analogs in other df's
   rename("American PW"="Amerian PW") 
 #includes column for "Total" and "P. berch" which other years don't have
@@ -230,6 +249,9 @@ most <-bind_rows(fd1416g,fd1720g)
 #glimpse(most)
 
 #format the "other species" column
+#in some cases, these taxa might have been simply observed in water rather than collected on rake
+#consider designating some or all of them as "visual" rather than "rake"
+#should probably drop the hybrid note because this 2019 sample was confirmed via genetics
 
 # Making data frame with existing strings and their replacement
 tr <- data.frame(target = c("Nitella 1","Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
@@ -293,13 +315,13 @@ most_cleaner <- most %>%
          ,"Ceratophyllum_demersum"="Coontail"
          ,"Najas_guadalupensis"="Southern Naiad"
          ,"Stuckenia_filiformis"="Threadleaf PW"
-         ,"Stuckenia_pectinatus"="Sago"
+         ,"Stuckenia_pectinata"="Sago"
          ,"Elodea_canadensis"="Elodea"
          ,"Potamogeton_richardsonii"="Richardson's PW"
          ,"Potamogeton_foliosus"="Leafy PW"
          ,"Potamogeton_nodosus"="American PW"
          ,"Nitella_sp"="Nitella"  
-         ,"Potamogeton_berchtoldii"="P. berch"        
+         ,"Potamogeton_pusillus"="P. berch"        
          ,"Potamogeton_pusillus"="P.pus"          
          ,"Myriophyllum_spicatum"="Milfoil"
          ) %>% 
@@ -335,6 +357,7 @@ rare <- all_complete %>%
 #presumably trace amounts of Nitella
 
 #add column to indicate which survey generated the data
+#also a column indicating observation type (sample vs visual)
 #finalize column headers
 #export this file back to sharepoint
                        
