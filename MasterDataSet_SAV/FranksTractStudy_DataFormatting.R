@@ -3,42 +3,50 @@
 #Submersed aquatic vegetation
 #Franks Tract long term monitoring
 
+#Nick Rasmussen
+#nicholas.rasmussen@water.ca.gov
+
+# To do list--------------
+
+#check for useful notes in original excel files
+
+#still don't have full set of coordinates for 2015 (missing 100 or 50%)
+#make version with all samples regardless of missing coordinates
+#make version for EDI with only samples with coordinates
+
+#make sure that date x site combos with no SAV are preserved as rows
+#these most likely got automatically dropped during data set assembly process
+
+#combine treatment summary data frame with rest of data
+#try to find where Shruti shared some of this treatment info with me (google drive)
+
+# Survey metadata------------------
+
 #2021 data will be collected October 6th
 
 #sampling method (Caudill et al 2019)
-#weighted, double-headed, 0.33 m wide rake, which was dragged for ~ 3 m along the bottom
+#weighted, double-headed, 0.33 m wide rake,
+#which was dragged for ~ 3 m along the bottom
 
 #rake coverage scoring key
+# 0 = 0%
 #	1 = 1-19%
 #	2 = 20-39%
 #	3 = 40-59%
 #	4 = 60-79%
 #	5 = 80-100%
 
-#Nick Rasmussen
-#nicholas.rasmussen@water.ca.gov
+# Helpful resources----------
 
-#check for useful notes in original excel files
+#working with GPX files using sf package
+#https://geocompr.github.io/geocompkg/articles/gps-tracks.html
 
-#has Franks Tract been treated every year of this survey?
-#based on Caudill et al 2019 (Table 1), all but 2009, 2013, and 2015 were treated during 2006-2017
-#what about 2018-2020?
 
-#need to look closer at GPS coordinates 
-#for 2017-2020, do the Easting/Northing data from Excel match the 
-#Latitude/Longitude data from the GPX file?
-
-#make sure that date x site combos with no SAV are preserved as rows
-#these most likely got automatically dropped during data set assembly process
-
-#determine how to accurately include species that were included in notes section
-#confirm that the correct latin names are used for all the species codes
-#make sure we have key to ordinal rake coverage categories
-
-# Packages
+# Packages--------
 library(tidyverse) #suite of data science tools
 library(readxl) #read excel files
 library(sf) #importing gpx file and converting to data frame
+library(deltamapr) #Sam's package with shapefiles for delta waterways
 
 # Read in the data----------------------------------------------
 # Data set is on SharePoint site for the 
@@ -53,15 +61,27 @@ sharepoint_path <- normalizePath(
   )
 )  
 
-#GPS coordinates for 2014 
-#data author confirmed that this is the same points used for 2016
+#GPS coordinates for 2014 from Excel
+#data author confirmed that these are the same points used for 2016
 #the 2014 points overlap with the 2015 points but still 100 points for 2015 missing
-gps14 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2014.xlsx"), range="eGERIA!A1:C101")
+#CRS is most likely WGS84
+gps14e <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2014.xlsx"), range="eGERIA!A1:C101")
 
-#GPS coordinates for 2017-2020
-#it is known that the same locations were sampled across these four years
-gps17 <- st_read(paste0(sharepoint_path,"./Franks Points.gpx"))
+#GPS coordinates for 2014 from GPX file
+#after overlaying both sets of 2014 coordinates on a map below, it's clear these 
+#sets of points are the same
+gps14g <- st_read(paste0(sharepoint_path,"./FT Survey Oct 2014 oDD SITES.gpx"))
 #throws a warning but looks OK
+gps14g #Geodetic CRS:  WGS 84
+
+#GPS coordinates for 2017-2020 from GPX file
+#it is known that the same locations were sampled across these four years
+#these is another set of coordinates for this year range in some of the excel files
+#after overlaying both sets of 2017-2020 coordinates on a map below, it's clear these 
+#sets of points are the same
+gps17g <- st_read(paste0(sharepoint_path,"./Franks Points.gpx"))
+#throws a warning but looks OK
+gps17g #Geodetic CRS:  WGS 84
 
 #2014
 #collected 10/7/2014
@@ -101,10 +121,30 @@ d20 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2020
 
 # Format data sets--------------
 
-#format GPS coordinates for 2017-2020
-fgps17 <- gps17 %>%
-  mutate(Latitude = unlist(map(gps17$geometry,2)),
-         Longitude = unlist(map(gps17$geometry,1)))%>% 
+#create data set with fluridone treatment info
+#Caudill et al 2019 (Table 1): all but 2009, 2013, 2015 treated during 2006-2017
+#what about 2018-2021?
+treatment <- data.frame("year" = c(2014:2021)
+  ,"area_treated_acres" = c(1872,0,1040,1097,NA,NA,NA,NA)
+  ,"control_tool" = "fluridone"
+)
+#NOTE: have not integrated treatment with rest of data
+
+#convert geometry to lat/long columns for 2014 from GPX file
+#these are odd numbered sites from 1-199
+#fgps14b <- gps14g %>%
+#  mutate(Latitude = unlist(map(gps14b$geometry,2)),
+#         Longitude = unlist(map(gps14b$geometry,1)))%>% 
+#  select(Latitude,Longitude) %>% 
+#  add_column("name" = seq(1,by=2,len=100)) %>% 
+#  st_set_geometry(NULL)  #removes geometry
+#glimpse(fgps14b)
+
+#format GPS coordinates for 2017-2020 from GPX file
+#these are in WGS84
+fgps17 <- gps17g %>%
+  mutate(Latitude = unlist(map(gps17g$geometry,2)),
+         Longitude = unlist(map(gps17g$geometry,1)))%>% 
   select(name,Latitude,Longitude) %>% 
   st_set_geometry(NULL) %>% 
   mutate(across(c("name"), as.numeric))
@@ -151,6 +191,10 @@ fd17 <- d17 %>%
 #includes column for "Nitella" while 2018-2020 don't; row_bind can handle this
 #glimpse(fd17)
 
+#extract 2017 GPS coordinates to add to 2020 data
+gps17e <- d17 %>% 
+  select("WYPT","Easting", "Northing")
+
 #format 2018
 fd18 <- d18 %>% 
   #add the sampling date
@@ -172,12 +216,8 @@ fd19 <- d19 %>%
 #row_bind can handle this
 #glimpse(fd19)
 
-#extract 2019 GPS coordinates to add to 2020 data
-gps19 <- d19 %>% 
-  select("WYPT","Easting", "Northing")
-
 #join 2019 GPS coordinates with 2020 SAV data
-d20g <- left_join(d20,gps19)
+d20g <- left_join(d20,gps17e)
 
 #see if any GPS coordinates failed to join properly
 #sum(is.na(d20g$Easting)) #0
@@ -193,25 +233,6 @@ fd20 <- d20g %>%
   mutate(across(c("CLP","American PW"), as.numeric))
 #glimpse(fd20)  
 
-# Examine GPS coordinates-------------
-
-#join 2014 and 2017 data sets to see if they match
-gps_comp <- full_join(gps14,fgps17, by = c("Label" = "name"))
-
-gps_cp <- gps_comp %>% 
-  rename(Latitude14 = Latitude.x
-         ,Longitude14 = Longitude.x
-         ,Latitude17 = Latitude.y
-         ,Longitude17 = Longitude.y
-         ) %>% 
-  mutate(lat_diff = Latitude14-Latitude17
-         ,lon_diff = Longitude14-Longitude17)
-#despite sharing some of the same site numbers, the coordinates do not match
-#between 2014 and 2017-2020
-
-#write the formatted data as csv on SharePoint
-#write_csv(gps_cp,file = paste0(sharepoint_path,"/FranksTract_CoordinatesComparison.csv"))
-
 # Combine data sets-----------------
 
 #combine 2014-2016
@@ -219,14 +240,22 @@ fd1416 <- bind_rows(fd14,fd15,fd16)
 
 #add the 2014 GPS coordinates
 #shared column has different names in the two df's
-#2014 GPS coordinates are latitude and longitude, but
-#2019 GPS coordinates are in easting and northing
-fd1416g <- left_join(fd1416,gps14, by = c("WYPT" = "Label")) 
+#2014 GPS coordinates are latitude and longitude (probably WGS84), but
+#2019 GPS coordinates are in easting and northing (probably UTMZone 10N)
+fd1416g <- left_join(fd1416,gps14e, by = c("WYPT" = "Label")) 
 
 #look at rows with NA for GPS coordinates
 #should just be half of the 2015 rows (n=100)
 sum(is.na(fd1416g$Latitude)) #100 as expected
 
+#though numbering of sites is the same for 2014-2016 and 2017-2020,
+#they are not in same locations, so distinguish names for two periods
+fd1416g2 <- fd1416g %>% 
+  #add column containing label for 2014-2017 points
+  add_column("station_set" = "A") %>% 
+  #new column that concatenates station set label and waypoint number
+  unite("station",c(station_set,WYPT),sep="",remove = T)
+  
 #combine 2017-2020
 fd1720 <- bind_rows(fd17,fd18,fd19,fd20)
 #bind worked even though columns weren't all in same order across df's
@@ -234,28 +263,35 @@ fd1720 <- bind_rows(fd17,fd18,fd19,fd20)
 #glimpse(fd1720)
 
 #join with df with latitude/longitude
-#need to figure out if lat/long and easting/northing data match
 #shared column has different names in the two df's
 fd1720g <- left_join(fd1720,fgps17, by = c("WYPT" = "name")) 
 
+#though numbering of sites is the same for 2014-2016 and 2017-2020,
+#they are not in same locations, so distinguish names for two periods
+fd1720g2 <- fd1720g %>% 
+  #add column containing label for 2014-2017 points
+  add_column("station_set" = "B") %>% 
+  #new column that concatenates station set label and waypoint number
+  unite("station",c(station_set,WYPT),sep="",remove = T)
+
 #first look at structure of each
-#glimpse(fd1416g) 
-#glimpse(fd1720g)
+#glimpse(fd1416g2) 
+#glimpse(fd1720g2)
 #looks like the former is a subset of columns of the later
 #and all analogous columns have identical names
 
 #combine data sets for all years
-most <-bind_rows(fd1416g,fd1720g)
+most <-bind_rows(fd1416g2,fd1720g2)
 #glimpse(most)
 
 #format the "other species" column
 #in some cases, these taxa might have been simply observed in water rather than collected on rake
-#consider designating some or all of them as "visual" rather than "rake"
-#should probably drop the hybrid note because this 2019 sample was confirmed via genetics
+#it's not clear which might have been on the rake vs visual so including all as rake
+#drop the hybrid note because this 2019 sample was not confirmed via genetics
 
 # Making data frame with existing strings and their replacement
-tr <- data.frame(target = c("Nitella 1","Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
-                 replacement = c("Nitella","Nitella","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
+tr <- data.frame(target = c("Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
+                 replacement = c("Nitella","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
 
 # Making the named replacement vector from tr
 replacements <- c(tr$replacement)
@@ -263,10 +299,13 @@ names(replacements) <- c(tr$target)
 
 #now format the other species df
 other <- most %>% 
-  select("date","WYPT","Other Species") %>% 
+  select("Latitude","Longitude","date","station","Other Species") %>% 
   rename("other_sp" = "Other Species") %>% 
   #drop all rows with NA
-  drop_na() %>% #18 remaining
+  drop_na() %>%   #18 remaining
+  #remove all Nitella sp rows from 2017 comments to avoid double counting (n=7)
+  #a column was created in original excel sheet to integrate these already
+  filter(!(other_sp=="Nitella 1" & date=="2017-10-10")) %>% 
   #clean up species names
   mutate(species1 = str_replace_all(other_sp,pattern = replacements)) %>%
   #this taxa required a second round because there was so much variation in naming
@@ -274,9 +313,9 @@ other <- most %>%
   #add column to indicate that coverage is category 1 for all
   #need to check with data author to see if this is accurate
   add_column("rake_coverage" = as.numeric(1)) %>% 
-  #remove one unneeded row
-  filter(species!="Lots of algae") %>% 
-  #drop unnneeded columns
+  #remove one unneeded algae row and one unconfirmed hybrid plant row
+  filter(species!="Lots of algae" & species!="Potamogeton_crispus_x_Potamogeton_pusillus") %>% 
+  #drop unneeded columns
   select(-c("other_sp","species1"))
 #glimpse(other)
 
@@ -287,11 +326,11 @@ other <- most %>%
 
 #create vector of species names that will be column headers for wide format df
 #this will be used during conversion from wide to long
-sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinatus","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_berchtoldii","Potamogeton_pusillus","Myriophyllum_spicatum") 
+sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinata","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_berchtoldii","Potamogeton_pusillus","Myriophyllum_spicatum") 
 
 most_cleaner <- most %>% 
   #subset to just needed columns and reorder them
-  select("WYPT"
+  select("station"
          ,"date"
          ,"Latitude"
          ,"Longitude"
@@ -321,11 +360,15 @@ most_cleaner <- most %>%
          ,"Potamogeton_foliosus"="Leafy PW"
          ,"Potamogeton_nodosus"="American PW"
          ,"Nitella_sp"="Nitella"  
-         ,"Potamogeton_pusillus"="P. berch"        
+         ,"Potamogeton_berchtoldii"="P. berch"        
          ,"Potamogeton_pusillus"="P.pus"          
          ,"Myriophyllum_spicatum"="Milfoil"
          ) %>% 
-  pivot_longer(all_of(sav_col), names_to = "species", values_to = "rake_coverage") %>% 
+  pivot_longer(all_of(sav_col), names_to = "species1", values_to = "rake_coverage") %>% 
+  #Potamogeton_berchtoldii is just Potamogeton_pusillus so do find and replace
+  mutate(species = str_replace_all(species1,"Potamogeton_berchtoldii","Potamogeton_pusillus")) %>% 
+  #drop old species column
+  select(-species1) %>% 
   #drop all rows with NA
   drop_na("rake_coverage") 
   
@@ -338,14 +381,16 @@ all_complete <- bind_rows(most_cleaner,other)
 unique(all_complete$species)
 
 #look at observations for rare taxa
-berch <- all_complete %>% 
-  filter(species=="Potamogeton_berchtoldii")
+nit <- all_complete %>% 
+  filter(species=="Nitella_sp") 
+#n=10
 
 zost <- all_complete %>% 
-  filter(species=="Potamogeton_zosteriformis")
+  filter(species=="Potamogeton_zosteriformis") 
+#n=5, data author said never collected on rakes, only visual
 
 pusl <- all_complete %>% 
-  filter(species=="Potamogeton_pusillus")
+  filter(species=="Potamogeton_pusillus") #n=7
 
 #look at range of abundance scores
 range(all_complete$rake_coverage) #0.01 5.00
@@ -353,14 +398,119 @@ hist(all_complete$rake_coverage)
 unique(all_complete$rake_coverage)
 rare <- all_complete %>% 
   filter(rake_coverage < 1)
-#there is one sample with score of 0.01
-#presumably trace amounts of Nitella
+#there is one sample with score of 0.01 (Nitella)
 
-#add column to indicate which survey generated the data
-#also a column indicating observation type (sample vs visual)
-#finalize column headers
-#export this file back to sharepoint
-                       
+#final formatting
+final <- all_complete %>% 
+  #change a single case of rake_coverage_ordinal from"0.01" to "1"
+  #this had been typed into original excel file as "1%"
+  mutate(rake_coverage_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)) %>% 
+  #add columns with program specific info
+  add_column("program_name" = "Franks_Tract_Management"
+             ,"survey_method" = "rake_weighted") %>% 
+  #rename some columns
+  rename("latitude_wgs84" = "Latitude"
+         ,"longitude_wgs84" = "Longitude") %>% 
+  #reorder columns
+  select("program_name"
+         ,"station"
+         ,"latitude_wgs84"
+         ,"longitude_wgs84"
+         ,"date"
+         ,"species"
+         ,"survey_method"
+         ,"rake_coverage_ordinal"
+  )
 
- 
+#map coordinates to compare them------------------
+#two versions of both 2014-2016 points and 2017-2020 points
+#GPX and Excel
+
+#website with EPSG codes for CRS
+#https://spatialreference.org/
+
+#Note: NAD83 and WGS84 are highly similar and perhaps indistinguishable
+#this explains why transformations between them appear to do nothing
+#https://www.esri.com/arcgis-blog/products/arcgis-desktop/mapping/wgs84-vs-nad83/
+
+#look at WW_Delta base map CRS
+st_crs(WW_Delta)
+#CRS = NAD83, which is different than our sample data points
+#EPSG: 4269
+
+#2014 Excel data: convert coordinates data frame to sf object
+#probably in WGS84 (EPSG = 4236)
+#then transform coordinates to NAD83 which is CRS of base layer
+ggps14e <- st_as_sf(gps14e, 
+                   coords = c(x='Longitude',y='Latitude'), 
+                   crs = 4236) %>%  #EPSG code for WGS84
+  st_transform(crs = 4269) #transform to NAD83
+
+#2014 GPX data: format is WGS84 (EPSG = 4236)
+#transform coordinates to NAD83 which is CRS of base layer
+ggps14g <- gps14g %>% 
+  st_transform(crs = 4269) 
+
+#2017 Excel file: convert coordinates data frame to sf object
+#probably in UTM zone 10N (EPSG = 26910)
+#then transform coordinates to NAD83 which is CRS of base layer
+ggps17e <- st_as_sf(gps17e, 
+                    coords = c(x='Easting',y='Northing'), 
+                    crs = 26910, #EPSG code for UTM zone 10N
+                    remove = F) %>% #keeps source coordinates columns which we need for plotting 
+  st_transform(crs = 4269) #transform to NAD83
+
+#2017-2020 GPX file: transform coordinates to base layer CRS
+ggps17g <- gps17g %>% 
+  st_transform(crs = 4269) #transform to NAD83
+  
+#plot bay-delta base layer with sample locations from four different files
+#add legend indicating which shapes/colors are which files
+(sav_map_all <- ggplot()+
+    #plot waterways base layer
+    geom_sf(data= WW_Delta, fill= "skyblue3", color= "black") +
+    #plot the 2014-2016 sampling locations based on Excel data
+    geom_sf(data= ggps14e, fill= "yellow", color= "black", shape= 22, size= 3.5) +
+    #plot the 2014-2016 sampling locations based on GPX data
+    geom_sf(data= ggps14g, fill= "red", color= "black", shape= 21, size= 3) +
+    #plot the 2017-2020 sampling locations based on Excel data
+    geom_sf(data= ggps17e, fill= "green", color= "black", shape= 23, size= 3) +
+    #plot the 2017-2020 sampling locations based on GPX data
+    geom_sf(data= ggps17g, fill= "orange", color= "black", shape= 24, size= 3) +
+    #zoom in on region of delta where samples were collected
+    #just eyeballed the range from google maps
+    #need to figure out a better way to do that in future
+    coord_sf( 
+      xlim =c(-121.56, -121.64),
+      ylim = c(38.07, 38.02)
+    )+
+    theme_bw()+
+    ggtitle('Franks Tract SAV Survey')
+)
+#ggsave(file = "FranksTract_Sampling_Map.png",type ="cairo-png",width=5, height=8,units="in",dpi=300)
+#summary
+#2014-2016: perfect match between Excel and GPX file
+#2017-2020: perfect match between Excel and GPX file
+#locations almost never match between 2014-2016 and 2017-2020 surveys
+#create simplified version with just one set from each of the two periods
+#and use their numbers instead of shapes
+
+#plot bay-delta base layer with sample locations from four different files
+#add legend indicating which shapes/colors are which files
+(sav_map_sub <- ggplot()+
+    #plot waterways base layer
+    geom_sf(data= WW_Delta, fill= "skyblue3", color= "black") +
+    #plot the 2014-2016 sampling locations based on Excel data
+    geom_sf(data= ggps14e, fill= "yellow", color= "black", shape= 22, size= 3.5, show.legend = "point") +
+    #plot the 2017-2020 sampling locations based on Excel data
+    geom_sf(data= ggps17e, fill= "green", color= "black", shape= 23, size= 3, show.legend = "point") +
+    coord_sf( 
+      xlim =c(-121.56, -121.64),
+      ylim = c(38.07, 38.02)
+    )+
+    theme_bw()+
+    ggtitle('Franks Tract SAV Survey')
+)
+#ggsave(file = "FranksTract_Sampling_Map.png",type ="cairo-png",width=5, height=8,units="in",dpi=300)
+#legend not working yet
 
