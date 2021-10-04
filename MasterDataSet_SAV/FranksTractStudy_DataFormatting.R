@@ -11,11 +11,6 @@
 #check for useful notes in original excel files
 
 #still don't have full set of coordinates for 2015 (missing 100 or 50%)
-#make version with all samples regardless of missing coordinates
-#make version for EDI with only samples with coordinates
-
-#make sure that date x site combos with no SAV are preserved as rows
-#these most likely got automatically dropped during data set assembly process
 
 #combine treatment summary data frame with rest of data
 #try to find where Shruti shared some of this treatment info with me (google drive)
@@ -128,7 +123,7 @@ treatment <- data.frame("year" = c(2014:2021)
   ,"area_treated_acres" = c(1872,0,1040,1097,NA,NA,NA,NA)
   ,"control_tool" = "fluridone"
 )
-#NOTE: have not integrated treatment with rest of data
+#NOTE: have not integrated treatment data with rest of data
 
 #convert geometry to lat/long columns for 2014 from GPX file
 #these are odd numbered sites from 1-199
@@ -141,7 +136,7 @@ treatment <- data.frame("year" = c(2014:2021)
 #glimpse(fgps14b)
 
 #format GPS coordinates for 2017-2020 from GPX file
-#these are in WGS84
+#these are in WGS84 which is the CRS we want
 fgps17 <- gps17g %>%
   mutate(Latitude = unlist(map(gps17g$geometry,2)),
          Longitude = unlist(map(gps17g$geometry,1)))%>% 
@@ -246,7 +241,7 @@ fd1416g <- left_join(fd1416,gps14e, by = c("WYPT" = "Label"))
 
 #look at rows with NA for GPS coordinates
 #should just be half of the 2015 rows (n=100)
-sum(is.na(fd1416g$Latitude)) #100 as expected
+#sum(is.na(fd1416g$Latitude)) #100 as expected
 
 #though numbering of sites is the same for 2014-2016 and 2017-2020,
 #they are not in same locations, so distinguish names for two periods
@@ -284,49 +279,11 @@ fd1720g2 <- fd1720g %>%
 most <-bind_rows(fd1416g2,fd1720g2)
 #glimpse(most)
 
-#format the "other species" column
-#in some cases, these taxa might have been simply observed in water rather than collected on rake
-#it's not clear which might have been on the rake vs visual so including all as rake
-#drop the hybrid note because this 2019 sample was not confirmed via genetics
-
-# Making data frame with existing strings and their replacement
-tr <- data.frame(target = c("Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
-                 replacement = c("Nitella","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
-
-# Making the named replacement vector from tr
-replacements <- c(tr$replacement)
-names(replacements) <- c(tr$target)
-
-#now format the other species df
-other <- most %>% 
-  select("Latitude","Longitude","date","station","Other Species") %>% 
-  rename("other_sp" = "Other Species") %>% 
-  #drop all rows with NA
-  drop_na() %>%   #18 remaining
-  #remove all Nitella sp rows from 2017 comments to avoid double counting (n=7)
-  #a column was created in original excel sheet to integrate these already
-  filter(!(other_sp=="Nitella 1" & date=="2017-10-10")) %>% 
-  #clean up species names
-  mutate(species1 = str_replace_all(other_sp,pattern = replacements)) %>%
-  #this taxa required a second round because there was so much variation in naming
-  mutate(species = str_replace_all(species1,"Nitella","Nitella_sp")) %>% 
-  #add column to indicate that coverage is category 1 for all
-  #need to check with data author to see if this is accurate
-  add_column("rake_coverage" = as.numeric(1)) %>% 
-  #remove one unneeded algae row and one unconfirmed hybrid plant row
-  filter(species!="Lots of algae" & species!="Potamogeton_crispus_x_Potamogeton_pusillus") %>% 
-  #drop unneeded columns
-  select(-c("other_sp","species1"))
-#glimpse(other)
-
-#write data to sharepoint folder
-#write_csv(other,file = paste0(sharepoint_path,"/FranksTract_RareTaxa.csv"))
-
 #clean up the (mostly) combined data set
 
 #create vector of species names that will be column headers for wide format df
 #this will be used during conversion from wide to long
-sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinata","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_berchtoldii","Potamogeton_pusillus","Myriophyllum_spicatum") 
+sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinata","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_berchtoldii","Potamogeton_pusillus","Myriophyllum_spicatum","Potamogeton_zosteriformis") 
 
 most_cleaner <- most %>% 
   #subset to just needed columns and reorder them
@@ -364,50 +321,83 @@ most_cleaner <- most %>%
          ,"Potamogeton_pusillus"="P.pus"          
          ,"Myriophyllum_spicatum"="Milfoil"
          ) %>% 
+  #add column for rare species only mentioned in "Other Species" column
+  add_column("Potamogeton_zosteriformis" = as.numeric(NA))  %>%
   pivot_longer(all_of(sav_col), names_to = "species1", values_to = "rake_coverage") %>% 
   #Potamogeton_berchtoldii is just Potamogeton_pusillus so do find and replace
   mutate(species = str_replace_all(species1,"Potamogeton_berchtoldii","Potamogeton_pusillus")) %>% 
+  #add column for survey method; will distinguish between rake and visual observations
+  add_column("survey_method"="rake_weighted") %>% 
+  #replace NAs with zeros for rake_coverage
+  replace_na(list("rake_coverage"=0)) %>% 
   #drop old species column
-  select(-species1) %>% 
+  select(-species1) 
+
+#format the "other species" column
+#some or all of these taxa might have been simply observed in water rather than collected on rake
+#decided to categorize these as "visual" rather than "rake-weighted" survey method
+#drop the hybrid note because this 2019 sample was not confirmed via genetics
+
+# Making data frame with existing strings and their replacement
+tr <- data.frame(target = c("Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
+                 replacement = c("Nitella","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
+
+# Making the named replacement vector from tr
+replacements <- c(tr$replacement)
+names(replacements) <- c(tr$target)
+
+#now format the other species df
+other <- most %>% 
+  select("Latitude","Longitude","date","station","Other Species") %>% 
+  rename("other_sp" = "Other Species") %>% 
+  #add column to indicate these were visual rather than rake observations
+  add_column("survey_method"="visual") %>% 
   #drop all rows with NA
-  drop_na("rake_coverage") 
-  
-#combine main df with "other species" df
+  drop_na() %>%   #18 remaining
+  #remove all Nitella sp rows from 2017 comments to avoid double counting (n=7)
+  #a column was created in original excel sheet to integrate these already
+  filter(!(other_sp=="Nitella 1" & date=="2017-10-10")) %>% 
+  #clean up species names
+  mutate(species1 = str_replace_all(other_sp,pattern = replacements)) %>%
+  #this taxa required a second round because there was so much variation in naming
+  mutate(species = str_replace_all(species1,"Nitella","Nitella_sp")) %>% 
+  #remove one unneeded algae row and one unconfirmed hybrid plant row
+  filter(species!="Lots of algae" & species!="Potamogeton_crispus_x_Potamogeton_pusillus") %>% 
+  #drop unneeded columns
+  select(-c("other_sp","species1"))
+#glimpse(other)
+
+#write data to sharepoint folder
+#write_csv(other,file = paste0(sharepoint_path,"/FranksTract_RareTaxa.csv"))
+
+#combine rake data with visual data
 #glimpse(most_cleaner)
 #glimpse(other)
 all_complete <- bind_rows(most_cleaner,other)
-
-#all unique taxa
-unique(all_complete$species)
-
-#look at observations for rare taxa
-nit <- all_complete %>% 
-  filter(species=="Nitella_sp") 
-#n=10
-
-zost <- all_complete %>% 
-  filter(species=="Potamogeton_zosteriformis") 
-#n=5, data author said never collected on rakes, only visual
-
-pusl <- all_complete %>% 
-  filter(species=="Potamogeton_pusillus") #n=7
+#glimpse(all_complete)
 
 #look at range of abundance scores
-range(all_complete$rake_coverage) #0.01 5.00
-hist(all_complete$rake_coverage)
 unique(all_complete$rake_coverage)
+hist(all_complete$rake_coverage)
 rare <- all_complete %>% 
   filter(rake_coverage < 1)
 #there is one sample with score of 0.01 (Nitella)
 
+#look at rows with missing coordinates
+#should just be in 2015
+coords <- all_complete %>% 
+  filter(is.na(Longitude))
+#look at date of these observations
+unique(coords$date) #"2015-10-13" - all from 2015 as expected
+
 #final formatting
+#includes some samples from 2015 without coordinates
 final <- all_complete %>% 
   #change a single case of rake_coverage_ordinal from"0.01" to "1"
   #this had been typed into original excel file as "1%"
   mutate(rake_coverage_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)) %>% 
   #add columns with program specific info
-  add_column("program_name" = "Franks_Tract_Management"
-             ,"survey_method" = "rake_weighted") %>% 
+  add_column("program_name" = "Franks_Tract_Management") %>% 
   #rename some columns
   rename("latitude_wgs84" = "Latitude"
          ,"longitude_wgs84" = "Longitude") %>% 
@@ -422,6 +412,20 @@ final <- all_complete %>%
          ,"rake_coverage_ordinal"
   )
 
+#see if the no SAV samples were preserved properly
+#n=29 I think across full time series
+#sum rake scores within samples and filter to show which sum to zero
+no_sav <- final %>% 
+  group_by(station, date) %>% 
+  summarize(sav_tot = sum(rake_coverage_ordinal)) %>% 
+  filter(sav_tot ==0) %>% 
+  arrange(date,station)
+#29 samples as expected
+
+#create version with 2015 samples that are missing coordinates removed
+final_coords_complete <- final %>% 
+  filter(!is.na(longitude_wgs84))
+
 #map coordinates to compare them------------------
 #two versions of both 2014-2016 points and 2017-2020 points
 #GPX and Excel
@@ -434,7 +438,7 @@ final <- all_complete %>%
 #https://www.esri.com/arcgis-blog/products/arcgis-desktop/mapping/wgs84-vs-nad83/
 
 #look at WW_Delta base map CRS
-st_crs(WW_Delta)
+#st_crs(WW_Delta)
 #CRS = NAD83, which is different than our sample data points
 #EPSG: 4269
 
@@ -511,6 +515,6 @@ ggps17g <- gps17g %>%
     theme_bw()+
     ggtitle('Franks Tract SAV Survey')
 )
-#ggsave(file = "FranksTract_Sampling_Map.png",type ="cairo-png",width=5, height=8,units="in",dpi=300)
+#ggsave(file = "FranksTract_Sampling_Map2.png",type ="cairo-png",width=5, height=8,units="in",dpi=300)
 #legend not working yet
 
