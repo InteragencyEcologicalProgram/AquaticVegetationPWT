@@ -49,7 +49,7 @@ library(deltamapr) #Sam's package with shapefiles for delta waterways
 
 # Define path on SharePoint site for data
 # I synced this folder to my OneDrive
-sharepoint_path <- normalizePath(
+sharepoint_path_read <- normalizePath(
   file.path(
     Sys.getenv("USERPROFILE"),
     "California Department of Water Resources/DWR - DSRS Aquatic Weed Control Action - MasterDataSet_SAV/Franks_Tract"
@@ -60,12 +60,12 @@ sharepoint_path <- normalizePath(
 #data author confirmed that these are the same points used for 2016
 #the 2014 points overlap with the 2015 points but still 100 points for 2015 missing
 #CRS is most likely WGS84
-gps14e <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2014.xlsx"), range="eGERIA!A1:C101")
+gps14e <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2014.xlsx"), range="eGERIA!A1:C101")
 
 #GPS coordinates for 2014 from GPX file
 #after overlaying both sets of 2014 coordinates on a map below, it's clear these 
 #sets of points are the same
-gps14g <- st_read(paste0(sharepoint_path,"./FT Survey Oct 2014 oDD SITES.gpx"))
+gps14g <- st_read(paste0(sharepoint_path_read,"./FT Survey Oct 2014 oDD SITES.gpx"))
 #throws a warning but looks OK
 gps14g #Geodetic CRS:  WGS 84
 
@@ -74,45 +74,45 @@ gps14g #Geodetic CRS:  WGS 84
 #these is another set of coordinates for this year range in some of the excel files
 #after overlaying both sets of 2017-2020 coordinates on a map below, it's clear these 
 #sets of points are the same
-gps17g <- st_read(paste0(sharepoint_path,"./Franks Points.gpx"))
+gps17g <- st_read(paste0(sharepoint_path_read,"./Franks Points.gpx"))
 #throws a warning but looks OK
 gps17g #Geodetic CRS:  WGS 84
 
 #2014
 #collected 10/7/2014
 #GPS coordinates in other tab (i.e., eGERIA)
-d14 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2014.xlsx"), range="Sheet1!A4:I104")
+d14 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2014.xlsx"), range="Sheet1!A4:I104")
 
 #2015
 #collected 10/13/2015
 #GPS coordinates in other tabs (i.e., eGERIA 2014, Richardson's pw 2014)
-d15 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2015.xlsx"), range="2015 data!A4:K204")
+d15 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2015.xlsx"), range="2015 data!A4:K204")
 
 #2016
 #collected 10/3/2016
 #GPS coordinates in other tabs (i.e., eGERIA 2014, Richardson's pw 2014)
-d16 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2016.xlsx"), range="2016!A4:K49")
+d16 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2016.xlsx"), range="2016!A4:K49")
 
 #2017
 #collected 10/10/2017
 #GPS coordinates available and imported with SAV data but different format from those for 2014
-d17 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2017.xlsx"), range="2017 Data!E4:U104")
+d17 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2017.xlsx"), range="2017 Data!E4:U104")
 
 #2018
 #excel file says 10/2/2018 but Jones & Thum 2021 says 10/3/2018
 #GPS coordinates available and imported with SAV data but different format from those for 2014
-d18 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2018.xlsx"), range="2018 Data!E4:T104")
+d18 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2018.xlsx"), range="2018 Data!E4:T104")
 
 #2019
 #says 10/2/2018 which was carried over from 2018 file
 #data author said it was 10/1/2019
 #GPS coordinates available and imported with SAV data but different format from those for 2014
-d19 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2019.xlsx"), range="2019 Data!E4:U104")
+d19 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2019.xlsx"), range="2019 Data!E4:U104")
 
 #2020
 #collected 10/6/2020
 #no GPS coordinates in file
-d20 <- read_excel(path=paste0(sharepoint_path,"./Frank Tract Survey October 2020.xlsx"), range="2020data!A4:N104")
+d20 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2020.xlsx"), range="2020data!A4:N104")
 
 # Format data sets--------------
 
@@ -368,7 +368,7 @@ other <- most %>%
 #glimpse(other)
 
 #write data to sharepoint folder
-#write_csv(other,file = paste0(sharepoint_path,"/FranksTract_RareTaxa.csv"))
+#write_csv(other,file = paste0(sharepoint_path_read,"/FranksTract_RareTaxa.csv"))
 
 #combine rake data with visual data
 #glimpse(most_cleaner)
@@ -421,6 +421,17 @@ no_sav <- final %>%
   filter(sav_tot ==0) %>% 
   arrange(date,station)
 #29 samples as expected
+
+# Define path on SharePoint site for output files
+# I synced this folder to my OneDrive
+sharepoint_path_write <- normalizePath(
+  file.path(
+    Sys.getenv("USERPROFILE"),
+    "California Department of Water Resources/DWR - DSRS Aquatic Weed Control Action - MasterDataSet_SAV/Clean&Formatted"
+  )
+) 
+#version with some missing coordinates for 2015
+#write_csv(final,file = paste0(sharepoint_path_write,"/FranksTractManagement_2014-2020_formatted.csv"))
 
 #create version with 2015 samples that are missing coordinates removed
 final_coords_complete <- final %>% 
