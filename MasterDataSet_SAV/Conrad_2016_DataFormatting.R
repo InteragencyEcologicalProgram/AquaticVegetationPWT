@@ -4,11 +4,12 @@
 #Conrad et al 2016 study
 
 #Notes
+#ask Louise for how dry mass per m^2 was calculated
+#need unique observation IDs; have that for each rake but not each spp within rake
 #there are water quality data associated with some of these samples but aren't in this data set
+#dissolved oxygen (mg/L), pH, specific conductance (μS), temperature (°C), and turbidity (NTU)
 #no WQ data for October 2008
 #get these from Louise
-#as Louise for how dry mass per m^2 was calculated
-#dissolved oxygen (mg/L), pH, specific conductance (μS), temperature (°C), and turbidity (NTU)
 #are rake numbers within site same location across dates?
 #dropped 284 samples with missing GPS coordinates; see if there is a logical way to fill in some of these
 
@@ -169,16 +170,19 @@ unique(sav_d$rake_id) #22 samples
 #plus "SAC_1_061809_R7" "STE_1_061809_R8", which should be zeros
 
 #look at cases of missing GPS coordinates
-lost <- long_cleaner %>% 
+lost <- long %>% 
   filter(is.na(easting)|is.na(northing))
-lost_samp<-unique(lost$id) #284 samples are missing coordinates
+lost_samp<-unique(lost$rake_id) #284 samples are missing coordinates
+lost_date<-unique(lost$gps_date) #all samples from 9 dates in Oct 2010 
+#this issue is notes in metadata for this data set
+
 #if samples are taken at the same rake numbers each date,
 #then maybe we can copy coordinates from other dates
 #if each sample location is unique, we should drop all these samples with missing coordinates
 
 #are there samples with missing dates? probably not
-miss_date <- long_cleaner %>% 
-  filter(is.na(date))
+miss_date <- long %>% 
+  filter(is.na(gps_date))
 #no missing dates
 
 #change species nicknames to latin names
@@ -193,6 +197,9 @@ replacements <- c(tr$replacement)
 names(replacements) <- c(tr$target)
 
 #make corrections based on data exploration above and do some more formatting/cleaning
+#NOTE: maybe keep some version of the "sample" column instead of using the "incidence" column
+#that might make it easier to denote samples with no SAV
+#TO DO: drop the geometry column
 long_cleaner <- long %>% 
   #all three samples with NAs for pa were were determined to be zeros so convert from NA
   replace_na(list(pa=0)) %>% 
@@ -219,45 +226,41 @@ long_cleaner <- long %>%
   #rename some columns 
   rename("id"="rake_id"
          ,"depth_m" = "depth"
-         ,"presence_absence"="pa"
+         ,"incidence"="pa"
          ,"species"="species1"
          ,"date"="gps_date") %>% 
   #add columns that identify these data as part of this survey
-  add_column("survey"=as.character("electrofishing_nearshore")
-             ,"survey_method"=as.character("thatch_rake")
+  add_column("program"=as.character("electrofishing_nearshore")
+             ,"survey_method"=as.character("rake_thatch")
              ) %>% 
   #add density columns; divides mass by area sampled by rake (0.101 m^2)
   #these don't match the ones from the original file so check with Louise
   mutate("density_fresh_g_m^2"=round((biomass_fresh_g/0.101),2)
          ,"density_dry_g_m^2"=round((biomass_dry_g/0.101),2)
          ) %>% 
+  #change CRS of sample coordinates
+  #specify the suspected CRS of original coordinate: UTM zone 10N (EPSG = 26910)
+  st_as_sf(coords = c("easting", "northing"), crs = 26910) %>%
+  #then transform to WGS84
+  st_transform(4236) %>% 
+  #then convert from geometry to columns
+  mutate(latitude_wgs84 = unlist(map(geometry,2)),
+         longitude_wgs84 = unlist(map(geometry,1))) %>% 
   #reorder columns
-  select("survey"
+  select("program"
          ,"id"
          , "date"
-         , "northing"
-         , "easting"
+         , "latitude_wgs84"
+         , "longitude_wgs84"
          , "species"
          , "survey_method"
-         , "presence_absence"
+         , "incidence"
          , "biomass_fresh_g"
          , "biomass_dry_g"
          ,"density_fresh_g_m^2"
          ,"density_dry_g_m^2"
          , "depth_m"
          )
-
-#convert northing/easting to latitude/longitude; might need to ask Louise for more info
-#actually could try to figure it out, map points, and see if they match article map
-long_gps<-long_cleaner %>%
-  #British National Grid probably has EPSG code 27700 but look this up to be sure
-  st_as_sf(coords = c("easting", "northing"), crs = 27700) %>%
-  #presumably the code below is for WGS84
-  st_transform(4326) %>%
-  st_coordinates() %>%
-  as_tibble()
-#this creates a df with only the lat/long data
-#work on this so it add these as columns to main df
 
 #look at total number of unique rake IDs
 #the number of rows should be 9x that number (ie, 9 species)
@@ -268,6 +271,8 @@ rake_ids <- unique(long_cleaner$rake_id)
 hist(long_cleaner$depth_m)
 range(long_cleaner$depth_m,na.rm = T) #0.10, 5.02
 
+#write the formatted dataset to sharepoint site
+#write_csv(long_cleaner,file = paste0(sharepoint_path,"/ConradEtAl2016_formatted.csv"))
 
 
 
