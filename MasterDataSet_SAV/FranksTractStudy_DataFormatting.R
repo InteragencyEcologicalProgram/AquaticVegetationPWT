@@ -8,8 +8,6 @@
 
 # To do list--------------
 
-#check for useful notes in original excel files
-
 #still don't have full set of coordinates for 2015 (missing 100 or 50%)
 
 #combine treatment summary data frame with rest of data
@@ -397,12 +395,12 @@ final <- all_complete %>%
   #this had been typed into original excel file as "1%"
   mutate(rake_coverage_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)) %>% 
   #add columns with program specific info
-  add_column("program_name" = "Franks_Tract_Management") %>% 
+  add_column("program" = "Franks_Tract_Management") %>% 
   #rename some columns
   rename("latitude_wgs84" = "Latitude"
          ,"longitude_wgs84" = "Longitude") %>% 
   #reorder columns
-  select("program_name"
+  select("program"
          ,"station"
          ,"latitude_wgs84"
          ,"longitude_wgs84"
@@ -510,7 +508,7 @@ ggps17g <- gps17g %>%
 #create simplified version with just one set from each of the two periods
 #and use their numbers instead of shapes
 
-#plot bay-delta base layer with sample locations from four different files
+#plot bay-delta base layer with two sets of sample locations
 #add legend indicating which shapes/colors are which files
 (sav_map_sub <- ggplot()+
     #plot waterways base layer
@@ -529,3 +527,22 @@ ggps17g <- gps17g %>%
 #ggsave(file = "FranksTract_Sampling_Map2.png",type ="cairo-png",width=5, height=8,units="in",dpi=300)
 #legend not working yet
 
+#plot bay-delta base layer with 2017-2021 sample locations
+#add legend indicating which shapes/colors are which files
+(sav_map_rec <- ggplot()+
+    #plot waterways base layer
+    geom_sf(data= WW_Delta, fill= "skyblue3", color= "black") +
+    #plot the 2014-2016 sampling locations based on Excel data
+    #geom_sf(data= ggps14e, fill= "yellow", color= "black", shape= 22, size= 3.5, show.legend = "point") +
+    #plot the 2017-2020 sampling locations based on Excel data
+    geom_sf(data= ggps17e, fill= "black", color= "black", shape= 21, size= 2, show.legend = "point") +
+    coord_sf( 
+      xlim =c(-121.56, -121.64),
+      ylim = c(38.07, 38.02)
+    )+
+    theme(plot.margin = unit(c(0.1,0.1,0.1,0.1), "in"))+
+    #ggtitle('Franks Tract Submerged Aquatic Vegetation Survey')+
+    theme_bw()
+)
+#ggsave(file = paste0(sharepoint_path_read,"./FranksTract_Sampling_Map.png")
+#         ,type ="cairo-png",width=6, height=6,units="in",dpi=300)
