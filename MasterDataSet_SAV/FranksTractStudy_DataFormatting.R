@@ -10,9 +10,6 @@
 
 #still don't have full set of coordinates for 2015 (missing 100 or 50%)
 
-#combine treatment summary data frame with rest of data
-#try to find where Shruti shared some of this treatment info with me (google drive)
-
 # Survey metadata------------------
 
 #2021 data will be collected October 6th
@@ -118,7 +115,7 @@ d20 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October
 #Caudill et al 2019 (Table 1): all but 2009, 2013, 2015 treated during 2006-2017
 #what about 2018-2021?
 treatment <- data.frame("year" = c(2014:2021)
-  ,"area_treated_acres" = c(1872,0,1040,1097,NA,NA,NA,NA)
+  ,"area_treated_acres" = c(1872,0,1040,1097,1126,0,0,0)
   ,"control_tool" = "fluridone"
 )
 #NOTE: have not integrated treatment data with rest of data
@@ -546,3 +543,4 @@ ggps17g <- gps17g %>%
 )
 #ggsave(file = paste0(sharepoint_path_read,"./FranksTract_Sampling_Map.png")
 #         ,type ="cairo-png",width=6, height=6,units="in",dpi=300)
+
