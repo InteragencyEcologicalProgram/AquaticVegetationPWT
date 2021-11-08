@@ -9,6 +9,8 @@
 # To do list--------------
 
 #still don't have full set of coordinates for 2015 (missing 100 or 50%)
+#add a column to indicate whether a sample had any SAV 
+#remove duplicate rows of P. pusillus
 
 # Survey metadata------------------
 
@@ -111,15 +113,6 @@ d20 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October
 
 # Format data sets--------------
 
-#create data set with fluridone treatment info
-#Caudill et al 2019 (Table 1): all but 2009, 2013, 2015 treated during 2006-2017
-#what about 2018-2021?
-treatment <- data.frame("year" = c(2014:2021)
-  ,"area_treated_acres" = c(1872,0,1040,1097,1126,0,0,0)
-  ,"control_tool" = "fluridone"
-)
-#NOTE: have not integrated treatment data with rest of data
-
 #convert geometry to lat/long columns for 2014 from GPX file
 #these are odd numbered sites from 1-199
 #fgps14b <- gps14g %>%
@@ -135,9 +128,10 @@ treatment <- data.frame("year" = c(2014:2021)
 fgps17 <- gps17g %>%
   mutate(Latitude = unlist(map(gps17g$geometry,2)),
          Longitude = unlist(map(gps17g$geometry,1)))%>% 
-  select(name,Latitude,Longitude) %>% 
   st_set_geometry(NULL) %>% 
-  mutate(across(c("name"), as.numeric))
+  mutate(across(c("name"), as.numeric)) %>% 
+  select(name,Latitude,Longitude)
+  
 #glimpse(fgps17)
 
 #format 2014
@@ -543,4 +537,20 @@ ggps17g <- gps17g %>%
 )
 #ggsave(file = paste0(sharepoint_path_read,"./FranksTract_Sampling_Map.png")
 #         ,type ="cairo-png",width=6, height=6,units="in",dpi=300)
+
+#auxillary data sets----------------
+#herbicide treatments and native/non-native species status
+
+#create data set with fluridone treatment info
+#Caudill et al 2019 (Table 1): all but 2009, 2013, 2015 treated during 2006-2017
+#got remaining info by emailing Division of Boating and Waterways
+treatment <- data.frame("year" = c(2014:2021)
+                        ,"area_treated_acres" = c(1872,0,1040,1097,1126,0,0,0)
+                        ,"control_tool" = "fluridone"
+)
+#NOTE: have not integrated treatment data with rest of data
+
+
+
+
 
