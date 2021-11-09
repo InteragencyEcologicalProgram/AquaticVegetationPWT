@@ -272,9 +272,13 @@ most <-bind_rows(fd1416g2,fd1720g2)
 
 #create vector of species names that will be column headers for wide format df
 #this will be used during conversion from wide to long
-sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinata","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_berchtoldii","Potamogeton_pusillus","Myriophyllum_spicatum","Potamogeton_zosteriformis") 
+sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinata","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_pusillus","Myriophyllum_spicatum","Potamogeton_zosteriformis") 
 
 most_cleaner <- most %>% 
+  #Two of the columns represent the same species using different names, "P. berch" and "P.pus"
+  #create a new column that combines these two columns; then exclude the old columns
+  rowwise() %>% 
+  mutate(p_pusillus = sum(c_across("P. berch":"P.pus"),na.rm=T)) %>%
   #subset to just needed columns and reorder them
   select("station"
          ,"date"
@@ -291,11 +295,10 @@ most_cleaner <- most %>%
          ,"Leafy PW"
          ,"American PW"
          ,"Nitella"  
-         ,"P. berch"        
-         ,"P.pus"          
+         ,"p_pusillus"
          ,"Milfoil"
          ) %>% 
-  rename("Egeria_densa"="Egeria"
+   rename("Egeria_densa"="Egeria"
          ,"Potamogeton_crispus"="CLP"
          ,"Ceratophyllum_demersum"="Coontail"
          ,"Najas_guadalupensis"="Southern Naiad"
@@ -306,21 +309,17 @@ most_cleaner <- most %>%
          ,"Potamogeton_foliosus"="Leafy PW"
          ,"Potamogeton_nodosus"="American PW"
          ,"Nitella_sp"="Nitella"  
-         ,"Potamogeton_berchtoldii"="P. berch"        
-         ,"Potamogeton_pusillus"="P.pus"          
+         #,"Potamogeton_berchtoldii"="P. berch"        
+         ,"Potamogeton_pusillus"="p_pusillus"          
          ,"Myriophyllum_spicatum"="Milfoil"
-         ) %>% 
+         )  %>% 
   #add column for rare species only mentioned in "Other Species" column
   add_column("Potamogeton_zosteriformis" = as.numeric(NA))  %>%
-  pivot_longer(all_of(sav_col), names_to = "species1", values_to = "rake_coverage") %>% 
-  #Potamogeton_berchtoldii is just Potamogeton_pusillus so do find and replace
-  mutate(species = str_replace_all(species1,"Potamogeton_berchtoldii","Potamogeton_pusillus")) %>% 
+  pivot_longer(all_of(sav_col), names_to = "species", values_to = "rake_coverage") %>% 
   #add column for survey method; will distinguish between rake and visual observations
   add_column("survey_method"="rake_weighted") %>% 
   #replace NAs with zeros for rake_coverage
-  replace_na(list("rake_coverage"=0)) %>% 
-  #drop old species column
-  select(-species1) 
+  replace_na(list("rake_coverage"=0))  
 
 #format the "other species" column
 #some or all of these taxa might have been simply observed in water rather than collected on rake
