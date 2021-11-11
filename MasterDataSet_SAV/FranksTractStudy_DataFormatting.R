@@ -9,12 +9,8 @@
 # To do list--------------
 
 #still don't have full set of coordinates for 2015 (missing 100 or 50%)
-#add a column to indicate whether a sample had any SAV 
-#remove duplicate rows of P. pusillus
 
 # Survey metadata------------------
-
-#2021 data will be collected October 6th
 
 #sampling method (Caudill et al 2019)
 #weighted, double-headed, 0.33 m wide rake,
@@ -110,6 +106,11 @@ d19 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October
 #collected 10/6/2020
 #no GPS coordinates in file
 d20 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2020.xlsx"), range="2020data!A4:N104")
+
+#2021
+#collected 10/6/2021
+#no GPS coordinates in file
+d21 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2021.xlsx"), range="Data!A4:P104")
 
 # Format data sets--------------
 
@@ -217,6 +218,27 @@ fd20 <- d20g %>%
   mutate(across(c("CLP","American PW"), as.numeric))
 #glimpse(fd20)  
 
+#join 2019 GPS coordinates with 2021 SAV data
+d21g <- left_join(d21,gps17e)
+
+#see if any GPS coordinates failed to join properly
+#sum(is.na(d21g$Easting)) #0
+#looks good
+
+#format 2021
+fd21 <- d21g %>% 
+  #add the sampling date
+  add_column("date" = as.Date("2021-10-06", "%Y-%m-%d")) %>% 
+  #rename column that differs from analogs in other df's
+  rename("Coontail" = "C. dem"
+         ,"Southern Naiad" = "N. guad"
+         ,"Threadleaf PW" = "S. fil"
+         ,"American PW"="Amerian PW"
+         ,"Leafy PW" = "P. fol") %>%  
+  #change type for some columns from logical to numeric
+  mutate(across(c("P.pus","American PW"), as.numeric))
+#glimpse(fd21) 
+
 # Combine data sets-----------------
 
 #combine 2014-2016
@@ -240,19 +262,19 @@ fd1416g2 <- fd1416g %>%
   #new column that concatenates station set label and waypoint number
   unite("station",c(station_set,WYPT),sep="",remove = T)
   
-#combine 2017-2020
-fd1720 <- bind_rows(fd17,fd18,fd19,fd20)
+#combine 2017-2021
+fd1721 <- bind_rows(fd17,fd18,fd19,fd20,fd21)
 #bind worked even though columns weren't all in same order across df's
 #and not all columns were shared across all df's
-#glimpse(fd1720)
+#glimpse(fd1721)
 
 #join with df with latitude/longitude
 #shared column has different names in the two df's
-fd1720g <- left_join(fd1720,fgps17, by = c("WYPT" = "name")) 
+fd1721g <- left_join(fd1721,fgps17, by = c("WYPT" = "name")) 
 
 #though numbering of sites is the same for 2014-2016 and 2017-2020,
 #they are not in same locations, so distinguish names for two periods
-fd1720g2 <- fd1720g %>% 
+fd1721g2 <- fd1721g %>% 
   #add column containing label for 2014-2017 points
   add_column("station_set" = "B") %>% 
   #new column that concatenates station set label and waypoint number
@@ -260,19 +282,19 @@ fd1720g2 <- fd1720g %>%
 
 #first look at structure of each
 #glimpse(fd1416g2) 
-#glimpse(fd1720g2)
+#glimpse(fd1721g2)
 #looks like the former is a subset of columns of the later
 #and all analogous columns have identical names
 
 #combine data sets for all years
-most <-bind_rows(fd1416g2,fd1720g2)
+most <-bind_rows(fd1416g2,fd1721g2)
 #glimpse(most)
 
 #clean up the (mostly) combined data set
 
 #create vector of species names that will be column headers for wide format df
 #this will be used during conversion from wide to long
-sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinata","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_pusillus","Myriophyllum_spicatum","Potamogeton_zosteriformis") 
+sav_col<-c("Egeria_densa","Potamogeton_crispus","Ceratophyllum_demersum","Najas_guadalupensis","Stuckenia_filiformis","Stuckenia_pectinata","Elodea_canadensis","Potamogeton_richardsonii","Potamogeton_foliosus","Potamogeton_nodosus","Nitella_sp","Potamogeton_pusillus","Myriophyllum_spicatum","Potamogeton_zosteriformis", "Heteranthera_dubia") 
 
 most_cleaner <- most %>% 
   #Two of the columns represent the same species using different names, "P. berch" and "P.pus"
@@ -297,6 +319,8 @@ most_cleaner <- most %>%
          ,"Nitella"  
          ,"p_pusillus"
          ,"Milfoil"
+         ,"P. zos"         
+         ,"H. dubia"
          ) %>% 
    rename("Egeria_densa"="Egeria"
          ,"Potamogeton_crispus"="CLP"
@@ -309,17 +333,32 @@ most_cleaner <- most %>%
          ,"Potamogeton_foliosus"="Leafy PW"
          ,"Potamogeton_nodosus"="American PW"
          ,"Nitella_sp"="Nitella"  
-         #,"Potamogeton_berchtoldii"="P. berch"        
          ,"Potamogeton_pusillus"="p_pusillus"          
          ,"Myriophyllum_spicatum"="Milfoil"
+         ,"Potamogeton_zosteriformis" = "P. zos"         
+         ,"Heteranthera_dubia" = "H. dubia"
          )  %>% 
   #add column for rare species only mentioned in "Other Species" column
-  add_column("Potamogeton_zosteriformis" = as.numeric(NA))  %>%
+  #add_column("Potamogeton_zosteriformis" = as.numeric(NA))  %>%
+  #want to create a column that indicates whether any SAV was present in a sample
+  #first create column that sums scores for all species in each sample
+  rowwise() %>% 
+  mutate(sav_tot = sum(c_across("Egeria_densa":"Heteranthera_dubia"),na.rm=T)) %>% 
+  #convert summed scores into no (0) or yes (1) dummy variables for SAV presence
+  mutate(sav_incidence = case_when(sav_tot > 0 ~ 1, 
+                        sav_tot == 0 ~ 0)) %>% 
+  #convert data frame from wide to long
   pivot_longer(all_of(sav_col), names_to = "species", values_to = "rake_coverage") %>% 
   #add column for survey method; will distinguish between rake and visual observations
   add_column("survey_method"="rake_weighted") %>% 
   #replace NAs with zeros for rake_coverage
-  replace_na(list("rake_coverage"=0))  
+  replace_na(list("rake_coverage"=0))  %>% 
+  #create a species incidence column
+  #convert scores into no (0) or yes (1) dummy variables for species presence
+  mutate(species_incidence = case_when(rake_coverage > 0 ~ 1, 
+                                       rake_coverage == 0 ~ 0)) %>% 
+  #drop unneeded column
+  select(-sav_tot)
 
 #format the "other species" column
 #some or all of these taxa might have been simply observed in water rather than collected on rake
@@ -339,7 +378,9 @@ other <- most %>%
   select("Latitude","Longitude","date","station","Other Species") %>% 
   rename("other_sp" = "Other Species") %>% 
   #add column to indicate these were visual rather than rake observations
-  add_column("survey_method"="visual") %>% 
+  add_column("survey_method"="visual"
+             ,"sav_incidence"=1
+             ,"species_incidence"=1) %>% 
   #drop all rows with NA
   drop_na() %>%   #18 remaining
   #remove all Nitella sp rows from 2017 comments to avoid double counting (n=7)
@@ -355,6 +396,13 @@ other <- most %>%
   select(-c("other_sp","species1"))
 #glimpse(other)
 
+#check to see if all cases of visual observations are also cases in which SAV was detected in 
+#associated sample
+#savi <- most_cleaner %>% 
+#  distinct(station,date,sav_incidence) 
+#savio <- left_join(other,savi)
+#yes, all visual observations are associated with sav samples
+  
 #write data to sharepoint folder
 #write_csv(other,file = paste0(sharepoint_path_read,"/FranksTract_RareTaxa.csv"))
 
@@ -370,6 +418,7 @@ hist(all_complete$rake_coverage)
 rare <- all_complete %>% 
   filter(rake_coverage < 1)
 #there is one sample with score of 0.01 (Nitella)
+#fixed this below
 
 #look at rows with missing coordinates
 #should just be in 2015
@@ -395,10 +444,13 @@ final <- all_complete %>%
          ,"latitude_wgs84"
          ,"longitude_wgs84"
          ,"date"
+         ,"sav_incidence"
          ,"species"
          ,"survey_method"
+         ,"species_incidence"
          ,"rake_coverage_ordinal"
   )
+
 
 #see if the no SAV samples were preserved properly
 #n=29 I think across full time series
@@ -419,11 +471,34 @@ sharepoint_path_write <- normalizePath(
   )
 ) 
 #version with some missing coordinates for 2015
-#write_csv(final,file = paste0(sharepoint_path_write,"/FranksTractManagement_2014-2020_formatted.csv"))
+#write_csv(final,file = paste0(sharepoint_path_write,"/FranksTractManagement_2014-2021_formatted.csv"))
 
 #create version with 2015 samples that are missing coordinates removed
 final_coords_complete <- final %>% 
   filter(!is.na(longitude_wgs84))
+
+#auxillary data sets----------------
+#herbicide treatments and native/non-native species status
+
+#create data set with fluridone treatment info
+#Caudill et al 2019 (Table 1): all but 2009, 2013, 2015 treated during 2006-2017
+#got remaining info by emailing Division of Boating and Waterways
+treatment <- data.frame("year" = c(2014:2021)
+                        ,"area_treated_acres" = c(1872,0,1040,1097,1126,0,0,0)
+                        ,"control_tool" = "fluridone"
+)
+#NOTE: have not integrated treatment data with rest of data
+#write_csv(treatment,file = paste0(sharepoint_path_write,"/FranksTractManagement_HerbicideTreatments.csv"))
+
+
+#create data set with native vs non-native status of all species
+spp <- unique(final$species)
+native <- data.frame("species" = c(spp)
+                     ,"native" = c("n","n",rep("y",10),"n","y","y")
+)
+#write_csv(native,file = paste0(sharepoint_path_write,"/FranksTractManagement_SpeciesOrigin.csv"))
+
+
 
 #map coordinates to compare them------------------
 #two versions of both 2014-2016 points and 2017-2020 points
@@ -536,20 +611,5 @@ ggps17g <- gps17g %>%
 )
 #ggsave(file = paste0(sharepoint_path_read,"./FranksTract_Sampling_Map.png")
 #         ,type ="cairo-png",width=6, height=6,units="in",dpi=300)
-
-#auxillary data sets----------------
-#herbicide treatments and native/non-native species status
-
-#create data set with fluridone treatment info
-#Caudill et al 2019 (Table 1): all but 2009, 2013, 2015 treated during 2006-2017
-#got remaining info by emailing Division of Boating and Waterways
-treatment <- data.frame("year" = c(2014:2021)
-                        ,"area_treated_acres" = c(1872,0,1040,1097,1126,0,0,0)
-                        ,"control_tool" = "fluridone"
-)
-#NOTE: have not integrated treatment data with rest of data
-
-
-
 
 

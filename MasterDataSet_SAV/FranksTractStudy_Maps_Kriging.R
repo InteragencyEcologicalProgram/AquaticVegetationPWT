@@ -36,25 +36,6 @@ dir_path <- normalizePath(
 #read in the data
 cleandat <- read_csv(file=paste0(dir_path,"./FranksTractManagement_2014-2020_formatted.csv"))
 
-#create data set with native vs non-native status of all species
-spp <- unique(cleandat$species)
-native <- data.frame("species" = c(spp)
-                     ,"native" = c("n","n",rep("y",10),"n","y")
-                     )
-#write_csv(native,file = paste0(dir_path,"/FranksTractManagement_SpeciesOrigin.csv"))
-
-
-#create data set with fluridone treatment info
-#Caudill et al 2019 (Table 1): all but 2009, 2013, 2015 treated during 2006-2017
-#got remaining info by emailing Division of Boating and Waterways
-treatment <- data.frame("year" = c(2014:2021)
-                        ,"area_treated_acres" = c(1872,0,1040,1097,1126,0,0,0)
-                        ,"control_tool" = "fluridone"
-)
-#NOTE: have not integrated treatment data with rest of data
-#write_csv(treatment,file = paste0(dir_path,"/FranksTractManagement_HerbicideTreatments.csv"))
-
-
 
 #sum scores by sample
 sumdat <- cleandat %>% 
