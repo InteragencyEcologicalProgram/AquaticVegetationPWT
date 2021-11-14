@@ -483,8 +483,8 @@ final_coords_complete <- final %>%
 #create data set with fluridone treatment info
 #Caudill et al 2019 (Table 1): all but 2009, 2013, 2015 treated during 2006-2017
 #got remaining info by emailing Division of Boating and Waterways
-treatment <- data.frame("year" = c(2014:2021)
-                        ,"area_treated_acres" = c(1872,0,1040,1097,1126,0,0,0)
+treatment <- data.frame("year" = c(2006:2021)
+                        ,"area_treated_acres" = c(140,3247,3247,0,500,2413,700,0,1872,0,1040,1097,1126,0,0,0)
                         ,"control_tool" = "fluridone"
 )
 #NOTE: have not integrated treatment data with rest of data
