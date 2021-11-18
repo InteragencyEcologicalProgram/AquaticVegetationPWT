@@ -5,6 +5,10 @@
 #To do list
 #there seem to be NAs present but seems like there shouldn't be; look closer at those
 
+#metadata
+#drought barriers where in place during 2015 and 2021
+#Kimmerer et al 2019: The Barrier was constructed in May 2015 and the channel was
+#closed on 28 May; the Barrier was breached on 1 October 2015, and fully removed by 15 November 2015
 
 #packages
 library(tidyverse) # wrangling tabular data and plotting
@@ -38,11 +42,15 @@ ssize <- dato %>%
 range(ssize$samples) #45 200
 
 #summarize data set to show number of occurrences of each spp by year
-#and the mean score for each spp and year
-occur <- dato  %>% 
+#and the mean and SE score for each spp and year
+occur <- dato  %>%
+  #drop the visual only observations because they don't have rake scores
+  #there aren't many of these anyway
+  filter(survey_method!="visual") %>% 
   group_by(date,species) %>% 
   summarize(sp_freq = sum(species_incidence)
             ,avg_score = mean(rake_coverage_ordinal)
+            ,se_score = std.error(rake_coverage_ordinal)
             , .groups = 'drop')  
 
 #add sample number to spp occurrence df
@@ -62,10 +70,10 @@ occura <- dato  %>%
   group_by(species) %>% 
   summarize(sp_freq = sum(species_incidence), .groups = 'drop') %>% 
   arrange(-sp_freq)
+#rare: "Nitella_sp", "Potamogeton_pusillus","Potamogeton_zosteriformis", "Potamogeton_nodosus", "Heteranthera_dubia"
 
-#use spp column from this df as list to specify order of bars in plot below
+#use spp column from this df as list to reorder bars in plot below
 ssp_order <- occura$species
-
 pcsn$species <- factor(pcsn$species
                           , levels= c("Potamogeton_richardsonii",  "Ceratophyllum_demersum",    "Egeria_densa"             
                           ,"Najas_guadalupensis"       ,"Elodea_canadensis"        , "Stuckenia_filiformis"     
@@ -74,10 +82,9 @@ pcsn$species <- factor(pcsn$species
                            ,"Potamogeton_zosteriformis", "Potamogeton_nodosus"      , "Heteranthera_dubia" 
                             ))
 
-
-#plot proportion of occurrences of each species by year
+#bar plot of proportion of occurrences of each species faceted by year
 #using proportion instead of number because sample sizes vary among years
-(plot_spp_occur_prop <-ggplot(pcsn
+(plot_spp_occur_prop_bar <-ggplot(pcsn
                               , aes(x=species, y= sp_freq_prop, fill=native))+
     geom_bar(stat = "identity") + 
     ylab("Proportional Occurrence") + xlab("Species") + 
@@ -88,10 +95,96 @@ pcsn$species <- factor(pcsn$species
 #angle spp names so they are readable
 #could lump rare taxa into "other" category (eg, any with ten or fewer occurrences)
 
-#plot of mean score by species and year----------------
+#line plot of proportion of occurrences of each species by year
+(plot_spp_occur_prop_line <-ggplot(pcsn
+                              , aes(x=date, y= sp_freq_prop, group=species, color=species))+
+    geom_line()+
+    geom_point()+
+    ylab("Proportional Occurrence") + xlab("Year")+  
+    facet_wrap(~native)
+)
+#plot is pretty busy, even with native and non-native spp separated
+#could also cut some of the rare taxa which would help a tiny bit
 
-#add spp origin to this data set
-meansc <- left_join(occur,origin)
+#line plot of proportion of occurrences of each species by year (no rare species)
+
+#filter out 5 taxa with ten or fewer occurrences across entire time series
+norare <- pcsn %>% 
+  filter(species != "Nitella_sp" & species != "Potamogeton_pusillus"& species != "Potamogeton_zosteriformis"& species !=  "Potamogeton_nodosus"& species !=  "Heteranthera_dubia")
+#should drop 28 rows but instead drops 40 rows; figure this out; is the related to potential NAs issue?
+
+#create df that categories the ten most common species into three groups
+#non-native, native pondweeds, other natives
+spp_groups <- data.frame("species" = c("Egeria_densa","Myriophyllum_spicatum", "Potamogeton_crispus"              
+                                      ,"Najas_guadalupensis","Ceratophyllum_demersum","Elodea_canadensis"        
+                                      , "Stuckenia_filiformis" ,"Stuckenia_pectinata","Potamogeton_foliosus","Potamogeton_richardsonii"
+                                      )
+                        ,"group" = c(rep("Non-native Species",3),rep("Other Native Species",3),rep("Native Pondweeds",4))
+)
+
+#add groups as column in main df
+norareg <- left_join(norare,spp_groups)
+
+#reorder spp for plotting
+#norareg$species <- factor(norareg$species
+#                       , levels= c("Potamogeton_richardsonii",  "Ceratophyllum_demersum",    "Egeria_densa"             
+#                                   ,"Najas_guadalupensis"       ,"Elodea_canadensis"        , "Stuckenia_filiformis"     
+#                                   ,"Stuckenia_pectinata"      , "Potamogeton_crispus"       ,"Potamogeton_foliosus"     
+#                                   ,"Myriophyllum_spicatum"    
+#                       ))
+
+#reorder spp groups for facetting
+norareg$group = factor(norareg$group, levels=c("Non-native Species","Native Pondweeds", "Other Native Species"))
+
+(plot_spp_occur_prop_line <-ggplot(norareg
+                                   , aes(x=date, y= sp_freq_prop, group=species, color=species))+
+    #2014 fluridone treatment
+    geom_rect(aes(xmin = as.Date("2014-03-01", format = '%Y-%m-%d'),
+                   xmax = as.Date("2014-11-01", format = '%Y-%m-%d'),
+                   ymin = -Inf, 
+                   ymax = Inf),
+               fill= 'palegoldenrod', color = 'palegoldenrod', alpha =0.9)+
+    #2015 drought barrier
+    geom_rect(aes(xmin = as.Date("2015-05-28", format = '%Y-%m-%d'),
+                  xmax = as.Date("2015-10-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'gray75', color = 'gray75', alpha =0.9)+
+    #2016 fluridone treatment
+    geom_rect(aes(xmin = as.Date("2016-03-01", format = '%Y-%m-%d'),
+                  xmax = as.Date("2016-11-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'palegoldenrod', color = 'palegoldenrod', alpha =0.9)+
+    #2017 fluridone treatment
+    geom_rect(aes(xmin = as.Date("2017-03-01", format = '%Y-%m-%d'),
+                  xmax = as.Date("2017-11-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'palegoldenrod', color = 'palegoldenrod', alpha =0.9)+
+    #2018 fluridone treatment
+    geom_rect(aes(xmin = as.Date("2018-03-01", format = '%Y-%m-%d'),
+                  xmax = as.Date("2018-11-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'palegoldenrod', color = 'palegoldenrod', alpha =0.9)+
+    #2021 drought barrier
+    geom_rect(aes(xmin = as.Date("2021-06-20", format = '%Y-%m-%d'),
+                  xmax = as.Date("2022-01-07", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'gray75', color = 'gray75', alpha =0.9)+
+    geom_line()+
+    geom_point()+
+    ylab("Proportional Occurrence") + xlab("Date")+  
+    facet_wrap(~group,nrow=3)
+)
+#28 May; the Barrier was breached on 1 October 2015
+#2021 installed in May, completed in late June, probably Notched in Nov
+#no overlap between fluridone treatment periods and drought barrier presence periods
+#so could show both as shaded regions behind time series
+
+#plot of mean score by species and year----------------
 
 #calculate mean score for each spp 
 #mostly want this to determine how best to order spp in bar graphs
@@ -99,26 +192,78 @@ mn_sp <- dato  %>%
   group_by(species) %>% 
   summarize(sp_avg_score = mean(rake_coverage_ordinal, na.rm=T), .groups = 'drop') %>% 
   arrange(-sp_avg_score)
+#looks like same order as occurrences
 
 #use spp column from this df as list to specify order of bars in plot below
 ssp_order2 <- mn_sp$species
 
-meansc$species <- factor(meansc$species
-                       , levels= c("Potamogeton_richardsonii",  "Ceratophyllum_demersum",    "Egeria_densa"             
-                                   ,"Najas_guadalupensis"       ,"Elodea_canadensis"        , "Stuckenia_filiformis"     
-                                   ,"Stuckenia_pectinata"      , "Potamogeton_crispus"       ,"Potamogeton_foliosus"     
-                                   ,"Myriophyllum_spicatum"   ,  "Nitella_sp"               , "Potamogeton_pusillus"     
-                                   ,"Potamogeton_zosteriformis", "Potamogeton_nodosus"      , "Heteranthera_dubia" 
-                       ))
-
 #plot mean scores of each species by year
-(plot_spp_score_avg <-ggplot(meansc
+(plot_spp_score_avg <-ggplot(norareg
                               , aes(x=species, y= avg_score, fill=native))+
     geom_bar(stat = "identity") + 
     ylab("Mean Ordinal Score") + xlab("Species") + 
     facet_wrap(~date, nrow=8)
 )
 #add standard error bars
+
+#line plot of mean ranks of each species by year (no rare species)
+
+#filter out 5 taxa with ten or fewer occurrences across entire time series
+norare <- pcsn %>% 
+  filter(species != "Nitella_sp" & species != "Potamogeton_pusillus"& species != "Potamogeton_zosteriformis"& species !=  "Potamogeton_nodosus"& species !=  "Heteranthera_dubia")
+
+(plot_spp_avg_score_line <-ggplot(norareg
+                                   , aes(x=date, y= avg_score, group=species, color=species))+
+    #2014 fluridone treatment
+    geom_rect(aes(xmin = as.Date("2014-03-01", format = '%Y-%m-%d'),
+                  xmax = as.Date("2014-11-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'palegoldenrod', color = 'palegoldenrod', alpha =0.9)+
+    #2015 drought barrier
+    geom_rect(aes(xmin = as.Date("2015-05-28", format = '%Y-%m-%d'),
+                  xmax = as.Date("2015-10-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'gray75', color = 'gray75', alpha =0.9)+
+    #2016 fluridone treatment
+    geom_rect(aes(xmin = as.Date("2016-03-01", format = '%Y-%m-%d'),
+                  xmax = as.Date("2016-11-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'palegoldenrod', color = 'palegoldenrod', alpha =0.9)+
+    #2017 fluridone treatment
+    geom_rect(aes(xmin = as.Date("2017-03-01", format = '%Y-%m-%d'),
+                  xmax = as.Date("2017-11-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'palegoldenrod', color = 'palegoldenrod', alpha =0.9)+
+    #2018 fluridone treatment
+    geom_rect(aes(xmin = as.Date("2018-03-01", format = '%Y-%m-%d'),
+                  xmax = as.Date("2018-11-01", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'palegoldenrod', color = 'palegoldenrod', alpha =0.9)+
+    #2021 drought barrier
+    geom_rect(aes(xmin = as.Date("2021-06-20", format = '%Y-%m-%d'),
+                  xmax = as.Date("2022-01-07", format = '%Y-%m-%d'),
+                  ymin = -Inf, 
+                  ymax = Inf),
+              fill= 'gray75', color = 'gray75', alpha =0.9)+
+    geom_errorbar(aes(ymin=avg_score-se_score, ymax=avg_score+se_score), width=30)+
+    geom_line()+
+    geom_point()+
+    ylab("Mean Abundance Score") + xlab("Date")+  
+    facet_wrap(~group,nrow=3)
+)
+#ggsave(file = paste0(dir_path,"./FranksTract_SePRO_MeanScores.png"),type ="cairo-png",width=8, height=7,units="in",dpi=300)
+
+#28 May; the Barrier was breached on 1 October 2015
+#2021 installed in May, completed in late June, probably Notched in Nov
+#no overlap between fluridone treatment periods and drought barrier presence periods
+#so could show both as shaded regions behind time series
+
+
 
 #could try to make a plot that has scores of all spp within samples summed and then calculate mean scores by year
 score_sum <- dato  %>% 
