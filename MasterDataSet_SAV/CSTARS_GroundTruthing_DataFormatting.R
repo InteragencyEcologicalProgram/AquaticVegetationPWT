@@ -8,6 +8,14 @@
 
 #to do list
 #format the visual survey data
+#for secchi depth, convert -99 to NA
+#for secchi depth, also decide how to deal with measurements where 
+#disc did not disappear before reaching bottom (ie, inaccurate readings)
+#incorporate SAV spp from comments
+  #includes trace spp and rare spp that should replace "SAV-Unknown"
+#convert time to military format of pacific standard time
+#consider changing NA for species to None
+#species called "leafy sago" in notes is probably P. nodosus according to UCD
 
 # Packages--------
 library(tidyverse) #suite of data science tools
@@ -43,11 +51,11 @@ dpts <- delta_pts %>%
   rename(date = gps_date
          ,time = gps_time
          ,feat = feat_name 
-         #need units for depth
+         #confirmed with UCD that units are feet
          ,depth_to_sav = depth_to_s
-         #need units for depth; based on histogram of data, most likely feet
+         #confirmed with UCD that units are feet
          ,secchi_depth = secchi_dep 
-         #need to determine if I interpretted this correctly
+         #this column indicates whether disc hit bottom before disappearing
          ,secchi_bottom = secchi_b
   ) %>% 
   #convert feet to meters for depth measurements
@@ -76,6 +84,7 @@ dpts <- delta_pts %>%
          ,tot_cover_spp_logical = if_else(tot_cover_spp > 0, 1,0)
          ,rake_diff = rake_teeth_logical-tot_cover_spp_logical
          #replace incorrect cases of rake_teeth=100% to rake_teeth=0%
+         #this probably happened because 100% was default
          #there remain four cases in which there is a spp listed but with no cover %
          #likely the rake_teeth column was incorrectly used instead of the spp cover column
          #probably should just delete these four because we won't know the rake_teeth value
@@ -191,7 +200,6 @@ tr <- data.frame(target = c("SAV-S-naiad"
                             ,"SAV-Algae"
                             ,"SAV-Am-pondweed"    
                             ,"SAV-Cabomba"
-                            #ask UCD what sp this is
                             ,"SAV-FnLf-pondweed"  
                             ,"SAV-Tapegrass"),
                  replacement = c("Najas_guadalupensis"        
@@ -202,14 +210,13 @@ tr <- data.frame(target = c("SAV-S-naiad"
                                  ,"Myriophyllum_spicatum"
                                  ,"Potamogeton_richardsonii"
                                  ,"Algae"
-                                 #check with UCD to see if this should just be "Stuckenia_sp"
+                                 #confirmed with UCD this should be S. pectinata
                                  ,"Stuckenia_pectinata"  
                                  ,"Potamogeton_crispus"
                                  ,"Algae"
                                  ,"Potamogeton_nodosus"    
                                  ,"Cabomba_caroliniana" 
-                                 #I guessed on this species
-                                 ,"Potamogeton_foliosus"  
+                                 ,"Stuckenia_filiformis"  
                                  ,"Vallisneria_australis"
                                  ))
 
@@ -235,7 +242,8 @@ dpts_cleaner <- dpts_long %>%
   add_column("program"="CSTARS"
              ,"survey_method"="rake_thatch") %>% 
   #change CRS of sample coordinates
-  #specify the CRS of original coordinate: presumably UTM NAD 83 (Zone 10N) (EPSG = 26910)
+  #specify the CRS of original coordinate
+  #confirmed that it is UTM NAD 83 (Zone 10N) (EPSG = 26910)
   st_as_sf(coords = c("easting", "northing"), crs = 26910) %>%
   #then transform to WGS84
   st_transform(4236) %>% 
@@ -258,17 +266,7 @@ dpts_cleaner <- dpts_long %>%
          ,"rake_prop"
          ,"secchi_depth_m"    
          ,"secchi_bottom"   
-         ,"treated"
          ) 
-#convert time to military time and pacific standard time
-#consider changing NA for species to None
-#need better explanation of comments
-  #I think sometimes it is indicating trace amounts of a species
-  #and sometimes identifying a rare species not in the drop down menu
-  #so the comment might be IDing "SAV-Unknown"
-
-#format date to military version of Pacific Standard Time
-#dpts_cleaner$time_pst <-as_hms(dpts_cleaner$time) 
 
 #look at depth to sav
 hist(dpts_cleaner$depth_to_sav_m)
@@ -282,7 +280,8 @@ secchi_count<-dpts_cleaner %>%
   filter(secchi_depth_m>=0) %>% 
   group_by(secchi_depth_m) %>% 
   summarize(count = n())
-#a lot of -99 values; presumably means not measured but should check with UCD
+#a lot of -99 values
+#confirmed with UCD these are just missing values
 sec<-dpts_cleaner %>% 
   filter(secchi_depth_m>=0) 
 hist(sec$secchi_depth_m)
@@ -293,13 +292,16 @@ bottom_count<-dpts_cleaner %>%
   group_by(secchi_bottom) %>% 
   summarize(count = n())
 #vast majority are "no" which makes sense because they sample in shallow areas
+#that means "No" measurements aren't accurate secchi depth measurements
 
 #look at treated
-#ask UCD what this is based on
-unique(dpts_cleaner$treated)
-treat_count<-dpts_cleaner %>% 
-  group_by(treated) %>% 
-  summarize(count = n())
+#according to UCD, this is just based on visual observation of foliage
+#probably most relevant for FAV
+#probably should just drop this column for SAV
+#unique(dpts_cleaner$treated)
+#treat_count<-dpts_cleaner %>% 
+ # group_by(treated) %>% 
+  #summarize(count = n())
 #all are "no"
 
 #write final data frame to csv file
