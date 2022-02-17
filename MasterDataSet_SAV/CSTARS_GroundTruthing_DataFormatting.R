@@ -10,6 +10,7 @@
 #2017: GPS coordinates are missing
 
 #to do list
+#move the dbf files to GitHub and pull them from there; easier to work with Shruti on it that way
 #format the visual survey data
 #for secchi depth, convert -99 to NA
 #for secchi depth, also decide how to deal with measurements where 
@@ -32,6 +33,7 @@ library(sf) #work with GPS coordinates
 library(janitor) #make column names tidier
 library(foreign) #read dbf files
 library(hms) #formatting time
+library(lubridate) #formatting dates
 
 # Read in the data----------------------------------------------
 # Data set is on SharePoint site for the 
@@ -54,20 +56,37 @@ pt_data_list <- dir(path = sharepoint_path_read, pattern = "\\_fieldpoints.dbf",
 #column types generally match across data sets
 #except that Rake_Teeth in 2016 is integer instead of factor
 #this is because files for all other years include "%" in this column while 2016 does not
-#combine 2017-2021 data
-sav_pt_data_most <- map_dfr(pt_data_list[2:6], ~read.dbf(.x))%>% 
+#start by combining 2017-2021 data
+#sav_pt_data_most2 <- map_dfr(pt_data_list[2:6], ~read.dbf(.x), .id = "file_name")%>% 
   #remove the "%" from the Rake_Teeth column of the 2017-2021 df
   #so we can incorporate the 2016 df
-  mutate(Rake_Teeth= as.integer(str_replace(Rake_Teeth,pattern = "%", replacement = ""))) %>% 
+#  mutate(Rake_Teeth= as.integer(str_replace(Rake_Teeth,pattern = "%", replacement = ""))) %>% 
+#  glimpse()
+sav_pt_data_most <- pt_data_list[2:6] %>%
+  #set_names() grabs the file names
+  set_names() %>%  
+  #reads in the files, .id adds the file name column
+  map_dfr(~read.dbf(.x), .id = "source") %>% 
+  #reduce file name to just the needed info (ie, year)
+  mutate(year = as.integer(str_sub(source,-22,-19))
+         ,month = as.integer(str_sub(source,-18,-17))
+         #remove the "%" from the Rake_Teeth column of the 2017-2021 df
+         #so we can incorporate the 2016 df
+         ,Rake_Teeth= as.integer(str_replace(Rake_Teeth,pattern = "%", replacement = ""))
+         ) %>% 
   glimpse()
 
 #see how consistent column names are across years
 #ie, are there extra columns created simply because of naming inconsistencies
-names(sav_pt_data_most) #generally looks consistent 
+#names(sav_pt_data_most) #generally looks consistent 
 
 #read in 2016 data separately
-sav_pt_data16 <- read.dbf(file = paste0(sharepoint_path_read,"./Delta201610_fieldPointLines/Delta201610_fieldpoints.dbf"))
-#sav_pt_data16 <- read.dbf(pt_data_list[1]) #another approach
+#sav_pt_data16 <- read.dbf(file = paste0(sharepoint_path_read,"./Delta201610_fieldPointLines/Delta201610_fieldpoints.dbf"))
+sav_pt_data16 <- read.dbf(pt_data_list[1]) %>% 
+  #add year and month columns 
+  add_column(year = as.integer("2016")
+             ,month = as.integer("10")
+             )
 
 #combine 2016 df with 2017-2021 df
 sav_all <- bind_rows(sav_pt_data16,sav_pt_data_most)
@@ -76,9 +95,28 @@ sav_all <- bind_rows(sav_pt_data16,sav_pt_data_most)
 #Rake spp data formatting-------------
 
 #look at range of dates
-unique(sav_all$GPS_Date) #"2021-07-13" "2021-09-13"
+unique(sav_all$GPS_Date) 
 #figure out why there are NAs
 #also correct "1899-12-30"
+
+#look at rows with date in 1899
+too_old <- sav_all %>% 
+  filter(GPS_Date < "2016-01-01") %>% 
+  group_by(year) %>% 
+  summarize(count=n())
+#75 obs from "1899-12-30"
+#2018 = 59 and 2019 = 16
+
+#look at rows with date = NA
+d_miss <- sav_all %>% 
+  filter(is.na(GPS_Date)) %>% 
+  group_by(year) %>% 
+  summarize(count=n()) %>% 
+  summarize(sum(count))
+#2017 = 66, 2018 = 59, 2019 = 71 (total = 196)
+#for now, won't worry about the messed up dates
+#I can get the month and year from the file names which is good enough short term
+#after filtering to just the SAV data, see how many messed up dates there are
 
 dpts <- sav_all %>% 
   #use janitor function to clean up column names
@@ -131,6 +169,8 @@ dpts <- sav_all %>%
   #reduce to just the needed columns
   select(northing
          ,easting
+         ,year
+         ,month
          ,date
          ,time
          ,feat  
@@ -147,6 +187,8 @@ dpts <- sav_all %>%
   glimpse()
 
 #look for cases in which values for rake_teeth_logical and tot_cover_spp_logical don't match
+#note that I made corrections to some of the rake_teeth above but those would still show up
+#in the rake_diff search 
 dpts_check <- dpts %>% 
   filter(rake_diff!=0)
 #no cases of rake_teeth being zero and spp cover being non-zero
@@ -156,12 +198,22 @@ dpts_check <- dpts %>%
 #in three cases 0<rake_teeth<100 and there is a spp named in rake_spec1 column
 #likely indicating that data were just entered into the wrong column
 
-#histogram of total rake coverage
+#histogram showing sum of all spp coverage on rake
+#should be either 0 or 100
 hist(dpts$tot_cover_spp)
 cover_count<-dpts %>%
   group_by(tot_cover_spp) %>%
   summarize(count = n())
-#most are either zero or 100 but there are various others, which indicate errors
+#most are either zero or 100 but there are various others, which indicates errors
+
+#count the tot_cover_spp that are wrong
+#ie, not zero or 100
+cover_count_wrong<-dpts %>%
+  filter(tot_cover_spp!=100 & tot_cover_spp!=0) %>% 
+  group_by(tot_cover_spp) %>%
+  summarize(count = n()) %>% 
+  summarize(sum(count))
+#72 samples with errors
 
 #convert data frame from wide to long
 dpts_long <- dpts %>% 
@@ -180,8 +232,14 @@ dpts_long <- dpts %>%
                , names_to = c("name","num") #specify column names
                , names_pattern = '([^0-9]+)([0-9]+)' #indicate where to split names (before and after numbers)
                , values_to = "value")  %>% 
+  glimpse()
+
+test <- dpts_long %>% 
   #now pivot back to a bit wider
   pivot_wider(names_from=name, values_from=value) %>% 
+  glimpse()
+  
+  
   #drop unneeded columns: ssp num, original rake_teeth with errors,
   select(-c(num,rake_teeth,rake_teeth_logical:comments)) %>% 
   glimpse()
@@ -192,10 +250,11 @@ unique(dpts_long$feat)
 
 #look at number of samples per feature type
 feat_count<-dpts_long %>% 
-  distinct(date,time,feat) %>% 
-  group_by(feat) %>% 
+  distinct(year,date,time,feat) %>% 
+  group_by(year,feat) %>% 
   summarize(count = n())
-#SAV is most abundant category, followed by EMR, float, Riparian
+#feature is new column for 2021; NA for all other years
+#in 2021, SAV is most abundant category, followed by EMR, float, Riparian
 #other categories are rare: Point_ge SAV2 Unknown
 
 #before dropping them, look at non-SAV feat types
@@ -204,6 +263,8 @@ fother <- dpts_long %>%
 unique(fother$rake_spec) #all NA which makes sense
   
 #look at unique species
+r_species <- dpts_long %>% 
+  distinct(rake_spec)
 unique(dpts_long$rake_spec)
 #looks like we still have some rake coverage numbers mixed in with the species
 #otherwise it looks good; a list of SAV species and some algae as expected
