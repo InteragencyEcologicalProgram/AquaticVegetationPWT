@@ -6,6 +6,9 @@
 #Nick Rasmussen
 #nicholas.rasmussen@water.ca.gov
 
+#NOTES: 
+#2017: GPS coordinates are missing
+
 #to do list
 #format the visual survey data
 #for secchi depth, convert -99 to NA
@@ -43,17 +46,41 @@ sharepoint_path_read <- normalizePath(
   )
 )  
 
-#read in the data
-#start with just the Delta point data
-delta_pts<-read.dbf(file = paste0(sharepoint_path_read,"./Delta202107_fieldpoints.dbf"))
-#glimpse(delta_pts)
+#Create character vector of all point data files
+#there is also line data but we can work with that later
+pt_data_list <- dir(path = sharepoint_path_read, pattern = "\\_fieldpoints.dbf", full.names = T, recursive=T)
+
+#Combine all of the data files into a single df
+#column types generally match across data sets
+#except that Rake_Teeth in 2016 is integer instead of factor
+#this is because files for all other years include "%" in this column while 2016 does not
+#combine 2017-2021 data
+sav_pt_data_most <- map_dfr(pt_data_list[2:6], ~read.dbf(.x))%>% 
+  #remove the "%" from the Rake_Teeth column of the 2017-2021 df
+  #so we can incorporate the 2016 df
+  mutate(Rake_Teeth= as.integer(str_replace(Rake_Teeth,pattern = "%", replacement = ""))) %>% 
+  glimpse()
+
+#see how consistent column names are across years
+#ie, are there extra columns created simply because of naming inconsistencies
+names(sav_pt_data_most) #generally looks consistent 
+
+#read in 2016 data separately
+sav_pt_data16 <- read.dbf(file = paste0(sharepoint_path_read,"./Delta201610_fieldPointLines/Delta201610_fieldpoints.dbf"))
+#sav_pt_data16 <- read.dbf(pt_data_list[1]) #another approach
+
+#combine 2016 df with 2017-2021 df
+sav_all <- bind_rows(sav_pt_data16,sav_pt_data_most)
+#names(sav_all) 
 
 #Rake spp data formatting-------------
 
 #look at range of dates
-range(delta_pts$GPS_Date) #"2021-07-13" "2021-09-13"
+unique(sav_all$GPS_Date) #"2021-07-13" "2021-09-13"
+#figure out why there are NAs
+#also correct "1899-12-30"
 
-dpts <- delta_pts %>% 
+dpts <- sav_all %>% 
   #use janitor function to clean up column names
   clean_names() %>% 
   #rename some columns
@@ -74,8 +101,7 @@ dpts <- delta_pts %>%
   #removes all % from data frame but converts all columns to character which is a hassle
   #mutate_all(str_replace_all, "%", "")
   #instead remove % from specific columns and make those columns numeric
-  mutate(rake_teeth= str_replace(rake_teeth,pattern = "%", replacement = "")
-         ,rake_spec2 = str_replace(rake_spec2,pattern = "%", replacement = "") 
+  mutate(rake_spec2 = str_replace(rake_spec2,pattern = "%", replacement = "") 
          ,rake_spec4 = str_replace(rake_spec4,pattern = "%", replacement = "")
          ,rake_spec6 = str_replace(rake_spec6,pattern = "%", replacement = "")
          ,rake_spec8 = str_replace(rake_spec8,pattern = "%", replacement = "")
@@ -162,7 +188,7 @@ dpts_long <- dpts %>%
 
 #looked at types of features
 unique(dpts_long$feat)
-#EMR Float Point_ge Riparian SAV SAV2 Unknown
+#<NA>     SAV      EMR      Float    Riparian Unknown  SAV2     Point_ge
 
 #look at number of samples per feature type
 feat_count<-dpts_long %>% 
@@ -240,6 +266,8 @@ dpts_cleaner <- dpts_long %>%
   filter(!(rake_teeth_corr>0 & is.na(rake_spec) & rake_prop=="0")) %>% 
   #also drop duplicates for cases when there is no sav
   #ie, collapse 5 rows to 1 row for the open water observations
+  #NOTE: keep working on this; this didn't quite accomplish the goal
+  #because there are cases within samples where rake_prop = 0 | NA
   filter(!duplicated(.)) %>% 
   #drop all feat types except SAV
   #already checked the others and they don't have SAV rake data (unsurprisingly)
