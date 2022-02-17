@@ -517,14 +517,14 @@ native <- data.frame("species" = c(spp)
 #EPSG: 4269
 
 #2014 Excel data: convert coordinates data frame to sf object
-#probably in WGS84 (EPSG = 4236)
+#probably in WGS84 (EPSG = 4326)
 #then transform coordinates to NAD83 which is CRS of base layer
 ggps14e <- st_as_sf(gps14e, 
                    coords = c(x='Longitude',y='Latitude'), 
-                   crs = 4236) %>%  #EPSG code for WGS84
+                   crs = 4326) %>%  #EPSG code for WGS84
   st_transform(crs = 4269) #transform to NAD83
 
-#2014 GPX data: format is WGS84 (EPSG = 4236)
+#2014 GPX data: format is WGS84 (EPSG = 4326)
 #transform coordinates to NAD83 which is CRS of base layer
 ggps14g <- gps14g %>% 
   st_transform(crs = 4269) 
