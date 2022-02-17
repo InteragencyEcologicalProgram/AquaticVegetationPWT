@@ -231,7 +231,7 @@ long_cleaner <- long %>%
   #specify the CRS of original coordinate: UTM NAD 83 (Zone 10N) (EPSG = 26910)
   st_as_sf(coords = c("easting", "northing"), crs = 26910) %>%
   #then transform to WGS84
-  st_transform(4236) %>% 
+  st_transform(4326) %>% 
   #then convert from geometry to columns
   mutate(latitude_wgs84 = unlist(map(geometry,2)),
          longitude_wgs84 = unlist(map(geometry,1))) %>% 
@@ -275,7 +275,7 @@ gps <- long_cleaner %>%
   distinct(date,longitude_wgs84,latitude_wgs84) %>% 
   #converting coordinates back to sf object
   st_as_sf(coords = c(x='longitude_wgs84',y='latitude_wgs84') 
-           ,crs = 4236
+           ,crs = 4326
            ,remove=F
            ) %>%  #EPSG code for WGS84
   #transform to NAD83 (basically same as WGS84 though)
