@@ -1,0 +1,1812 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="ExpertGPS 5.20" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.topografix.com/GPX/gpx_style/0/2 http://www.topografix.com/GPX/gpx_style/0/2/gpx_style.xsd http://www.topografix.com/GPX/gpx_overlay/0/3 http://www.topografix.com/GPX/gpx_overlay/0/3/gpx_overlay.xsd http://www.topografix.com/GPX/gpx_modified/0/1 http://www.topografix.com/GPX/gpx_modified/0/1/gpx_modified.xsd">
+<metadata>
+<bounds minlat="38.02225825" minlon="-121.62572755" maxlat="38.05846965" maxlon="-121.58420641"/>
+<extensions>
+<time xmlns="http://www.topografix.com/GPX/gpx_modified/0/1">2014-10-08T13:22:48.235Z</time>
+</extensions>
+</metadata>
+<wpt lat="38.02225825" lon="-121.60557833">
+<time>2014-10-06T21:51:53.401Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>1</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02401402" lon="-121.60094797">
+<time>2014-10-06T21:52:01.841Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>3</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02410483" lon="-121.60557833">
+<time>2014-10-06T21:52:07.582Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>5</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02598163" lon="-121.60978776">
+<time>2014-10-06T21:52:14.976Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>7</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02592109" lon="-121.60546353">
+<time>2014-10-06T21:52:21.309Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>9</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02583028" lon="-121.60068010">
+<time>2014-10-06T21:52:27.394Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>11</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02767676" lon="-121.59853712">
+<time>2014-10-06T21:52:35.147Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>13</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02761622" lon="-121.60316748">
+<time>2014-10-06T21:52:41.542Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>15</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02773730" lon="-121.60760651">
+<time>2014-10-06T21:52:46.832Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>17</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02955347" lon="-121.60997909">
+<time>2014-10-06T21:52:51.933Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>19</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02949293" lon="-121.60550180">
+<time>2014-10-06T21:52:57.703Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>21</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02937185" lon="-121.60094797">
+<time>2014-10-06T21:53:03.631Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>23</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02949293" lon="-121.59616454">
+<time>2014-10-06T21:53:09.857Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>25</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.02943239" lon="-121.59187858">
+<time>2014-10-06T21:53:15.255Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>27</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03112744" lon="-121.58958253">
+<time>2014-10-06T21:53:21.618Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>29</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03106690" lon="-121.59405982">
+<time>2014-10-06T21:53:27.250Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>31</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03112744" lon="-121.59857539">
+<time>2014-10-06T21:53:34.786Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>33</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03124851" lon="-121.60305268">
+<time>2014-10-06T21:53:40.776Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>35</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03133932" lon="-121.60772131">
+<time>2014-10-06T21:53:47.157Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>37</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03139986" lon="-121.61204554">
+<time>2014-10-06T21:53:53.085Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>39</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03306459" lon="-121.61445639">
+<time>2014-10-06T21:54:07.796Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>41</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03321593" lon="-121.60994083">
+<time>2014-10-06T21:54:13.286Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>43</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03303433" lon="-121.60538700">
+<time>2014-10-06T21:54:19.371Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>45</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03318566" lon="-121.60068010">
+<time>2014-10-06T21:54:25.315Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>47</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03303433" lon="-121.59597320">
+<time>2014-10-06T21:54:30.463Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>49</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03306459" lon="-121.59153417">
+<time>2014-10-06T21:54:36.344Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>51</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.03324620" lon="-121.58698034">
+<time>2014-10-06T21:54:43.378Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>53</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04002581" lon="-121.58919986">
+<time>2014-10-06T21:54:55.111Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>55</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04008634" lon="-121.59394502">
+<time>2014-10-06T21:54:59.588Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>57</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04014687" lon="-121.59846058">
+<time>2014-10-06T21:55:05.078Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>59</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04014687" lon="-121.60286134">
+<time>2014-10-06T21:55:18.901Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>61</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04029819" lon="-121.60764478">
+<time>2014-10-06T21:55:24.141Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>63</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04035872" lon="-121.61212207">
+<time>2014-10-06T21:55:29.523Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>65</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04047978" lon="-121.61659937">
+<time>2014-10-06T21:55:34.904Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>67</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04051005" lon="-121.62096186">
+<time>2014-10-06T21:55:40.788Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>69</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04241708" lon="-121.62563986">
+<time>2014-10-06T21:59:23.700Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>71</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04224371" lon="-121.62103615">
+<time>2014-10-06T21:59:30.157Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>73</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04231306" lon="-121.61665165">
+<time>2014-10-06T21:59:35.976Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>75</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04224371" lon="-121.61187256">
+<time>2014-10-06T21:59:43.232Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>77</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04217436" lon="-121.60744422">
+<time>2014-10-06T21:59:49.674Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>79</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04217436" lon="-121.60292819">
+<time>2014-10-06T21:59:55.601Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>81</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04196631" lon="-121.59814910">
+<time>2014-10-06T22:00:01.733Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>83</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04189696" lon="-121.59372076">
+<time>2014-10-06T22:00:07.381Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>85</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04186228" lon="-121.58907320">
+<time>2014-10-06T22:00:13.309Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>87</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04182761" lon="-121.58460102">
+<time>2014-10-06T22:00:22.513Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>89</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04376938" lon="-121.58683711">
+<time>2014-10-06T22:00:30.578Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>91</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04376938" lon="-121.59139698">
+<time>2014-10-06T22:00:37.052Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>93</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04387340" lon="-121.59608839">
+<time>2014-10-06T22:00:42.684Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>95</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04390807" lon="-121.60047288">
+<time>2014-10-06T22:00:49.733Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>97</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04394275" lon="-121.60498891">
+<time>2014-10-06T22:00:55.740Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>99</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04408144" lon="-121.60972416">
+<time>2014-10-06T22:01:01.341Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>101</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04408144" lon="-121.61406480">
+<time>2014-10-06T22:01:08.174Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>103</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04418546" lon="-121.61880006">
+<time>2014-10-06T22:01:14.196Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>105</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04425481" lon="-121.62335993">
+<time>2014-10-06T22:01:19.640Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>107</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04605782" lon="-121.62572755">
+<time>2014-10-06T22:01:26.177Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>109</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04602315" lon="-121.62099230">
+<time>2014-10-06T22:01:32.634Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<time xmlns="http://www.topografix.com/GPX/gpx_modified/0/1">2014-10-06T22:01:52.118Z</time>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>111</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04581511" lon="-121.61665165">
+<time>2014-10-06T22:02:04.319Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>113</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04584979" lon="-121.61182871">
+<time>2014-10-06T22:02:09.575Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>115</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04574577" lon="-121.60740038">
+<time>2014-10-06T22:02:15.114Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>117</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04578044" lon="-121.60284050">
+<time>2014-10-06T22:02:21.180Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>119</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04574577" lon="-121.59832448">
+<time>2014-10-06T22:02:26.828Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>121</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04564175" lon="-121.59376461">
+<time>2014-10-06T22:02:32.256Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>123</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04546838" lon="-121.58924858">
+<time>2014-10-06T22:02:41.585Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>125</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.04553773" lon="-121.58446948">
+<time>2014-10-06T22:02:47.342Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>127</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05091186" lon="-121.58420641">
+<time>2014-10-06T22:02:53.490Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>129</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05101587" lon="-121.58916089">
+<time>2014-10-06T22:03:00.868Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>131</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05101587" lon="-121.59367692">
+<time>2014-10-06T22:03:08.838Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>133</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05108522" lon="-121.59819294">
+<time>2014-10-06T22:03:14.565Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>135</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05115456" lon="-121.60270897">
+<time>2014-10-06T22:03:28.559Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>137</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05125857" lon="-121.60735653">
+<time>2014-10-06T22:03:34.190Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>139</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05122390" lon="-121.61178487">
+<time>2014-10-06T22:03:40.305Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>141</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05136258" lon="-121.61625705">
+<time>2014-10-06T22:03:46.029Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>143</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05139725" lon="-121.62099230">
+<time>2014-10-06T22:03:51.881Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>145</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05313075" lon="-121.61866852">
+<time>2014-10-06T22:03:57.059Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>147</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05306141" lon="-121.61397711">
+<time>2014-10-06T22:04:03.331Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>149</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05302674" lon="-121.60932955">
+<time>2014-10-06T22:04:10.552Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>151</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05299207" lon="-121.60498891">
+<time>2014-10-06T22:04:16.434Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>153</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05299207" lon="-121.60025365">
+<time>2014-10-06T22:04:22.223Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>155</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05285339" lon="-121.59573763">
+<time>2014-10-06T22:04:28.572Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>157</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05292273" lon="-121.59122160">
+<time>2014-10-06T22:04:35.015Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>159</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05264537" lon="-121.58653020">
+<time>2014-10-06T22:04:41.302Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>161</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05448284" lon="-121.58420641">
+<time>2014-10-06T22:04:48.072Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>163</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05455218" lon="-121.58894167">
+<time>2014-10-06T22:04:53.812Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>165</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05455218" lon="-121.59345769">
+<time>2014-10-06T22:05:22.578Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>167</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05465619" lon="-121.59797372">
+<time>2014-10-06T22:05:28.523Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>169</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05476019" lon="-121.60279666">
+<time>2014-10-06T22:05:34.513Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>171</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05482953" lon="-121.60726884">
+<time>2014-10-06T22:05:40.426Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>173</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05472553" lon="-121.61165333">
+<time>2014-10-06T22:05:46.414Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>175</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05496821" lon="-121.61625705">
+<time>2014-10-06T22:05:52.594Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>177</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05510688" lon="-121.62086077">
+<time>2014-10-06T22:05:58.365Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>179</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05642427" lon="-121.60713731">
+<time>2014-10-06T22:06:04.325Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>181</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05659761" lon="-121.60262128">
+<time>2014-10-06T22:06:10.440Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>183</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05642427" lon="-121.59775449">
+<time>2014-10-06T22:06:16.305Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>185</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05642427" lon="-121.59354538">
+<time>2014-10-06T22:06:21.719Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>187</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05642427" lon="-121.58907320">
+<time>2014-10-06T22:06:26.631Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>189</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05621627" lon="-121.58425026">
+<time>2014-10-06T22:06:32.982Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>191</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05819232" lon="-121.59139698">
+<time>2014-10-06T22:06:39.394Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>193</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05822698" lon="-121.59560609">
+<time>2014-10-06T22:06:45.384Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>195</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05840032" lon="-121.60016596">
+<time>2014-10-06T22:06:50.921Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>197</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<wpt lat="38.05846965" lon="-121.60481353">
+<time>2014-10-06T22:06:57.115Z</time>
+<sym>Pin, Red</sym>
+<type>Waypoint</type>
+<extensions>
+<label xmlns="http://www.topografix.com/GPX/gpx_overlay/0/3">
+<label_text>199</label_text>
+<text xmlns="http://www.topografix.com/GPX/gpx_style/0/2">
+<font>
+<family generic="sans-serif">
+<face>Arial</face>
+</family>
+<weight>bold</weight>
+</font>
+</text>
+</label>
+</extensions>
+</wpt>
+<extensions>
+</extensions>
+</gpx>
