@@ -14,22 +14,12 @@
 library(tidyverse) # wrangling tabular data and plotting
 library(plotrix) #calcuate standard error
 
-
-# Define path on SharePoint site for data
-# I synced this folder to my OneDrive
-dir_path <- normalizePath(
-  file.path(
-    Sys.getenv("USERPROFILE"),
-    "California Department of Water Resources/DWR - DSRS Aquatic Weed Control Action - MasterDataSet_SAV/Clean&Formatted"
-  )
-)  
-
 #read in the sample data
-cleandat <- read_csv(file=paste0(dir_path,"./FranksTractManagement_2014-2021_formatted.csv"))
+cleandat <- read_csv("./Data_Formatted/FranksTractManagement_2014-2021_formatted.csv")
 #glimpse(cleandat) #looks good
 
 #read in the data showing species origin
-origin <- read_csv(file=paste0(dir_path,"./FranksTractManagement_SpeciesOrigin.csv"))
+origin <- read_csv("./Data_Formatted/FranksTractManagement_SpeciesOrigin.csv")
 
 #combine sample and spp origin dfs
 dato <- left_join(cleandat,origin)
