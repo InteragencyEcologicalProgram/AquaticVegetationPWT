@@ -13,10 +13,16 @@
 #packages
 library(tidyverse) # wrangling tabular data and plotting
 library(plotrix) #calcuate standard error
+library(RColorBrewer) #color palette for plot
 
 #read in the sample data
 cleandat <- read_csv("./Data_Formatted/FranksTractManagement_2014-2021_formatted.csv")
 #glimpse(cleandat) #looks good
+
+#create subset for Eli
+#last <- cleandat %>% 
+#  filter(date=="2021-10-06")
+#write_csv(last,"Sepro_SAV_2021.csv")
 
 #read in the data showing species origin
 origin <- read_csv("./Data_Formatted/FranksTractManagement_SpeciesOrigin.csv")
@@ -202,8 +208,22 @@ ssp_order2 <- mn_sp$species
 norare <- pcsn %>% 
   filter(species != "Nitella_sp" & species != "Potamogeton_pusillus"& species != "Potamogeton_zosteriformis"& species !=  "Potamogeton_nodosus"& species !=  "Heteranthera_dubia")
 
+#create distinct shape, color, and line combos for species so they are distinguishable
+shps <- c(
+  "Ceratophyllum_demersum"
+  ,"Egeria_densa"             
+  ,"Elodea_canadensis"       
+  ,"Myriophyllum_spicatum"    
+  ,"Najas_guadalupensis"      
+  ,"Potamogeton_crispus"     
+  ,"Potamogeton_foliosus"     
+  ,"Potamogeton_richardsonii" 
+  ,"Stuckenia_filiformis"    
+  ,"Stuckenia_pectinata" 
+          )
+
 (plot_spp_avg_score_line <-ggplot(norareg
-                                   , aes(x=date, y= avg_score, group=species, color=species))+
+                                   , aes(x=date, y= avg_score, group=species, color=species,line=group,point=group))+
     #2014 fluridone treatment
     geom_rect(aes(xmin = as.Date("2014-03-01", format = '%Y-%m-%d'),
                   xmax = as.Date("2014-11-01", format = '%Y-%m-%d'),
@@ -241,12 +261,15 @@ norare <- pcsn %>%
                   ymax = Inf),
               fill= 'gray75', color = 'gray75', alpha =0.9)+
     geom_errorbar(aes(ymin=avg_score-se_score, ymax=avg_score+se_score), width=30)+
-    geom_line()+
-    geom_point()+
+    geom_line(aes(linetype=group))+
+    geom_point(aes(shape=group))+
+    #scale_shape_manual(values=group, aesthetics = c("colour", "fill"))+
+    #scale_color_manual(values=cols, aesthetics = c("colour", "fill"))+
+    #scale_color_brewer(palette = "Set3")+ #colors are fairly  distinctive but many too light to show up well
     ylab("Mean Abundance Score") + xlab("Date")+  
     facet_wrap(~group,nrow=3)
 )
-#ggsave(file = paste0(dir_path,"./FranksTract_SePRO_MeanScores.png"),type ="cairo-png",width=8, height=7,units="in",dpi=300)
+#ggsave(plot=plot_spp_avg_score_line, file = "Data_Formatted/FranksTract_SePRO_MeanScores.png",type ="cairo-png",width=8, height=7,units="in",dpi=300)
 
 #28 May; the Barrier was breached on 1 October 2015
 #2021 installed in May, completed in late June, probably Notched in Nov
