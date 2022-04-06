@@ -209,21 +209,39 @@ norare <- pcsn %>%
   filter(species != "Nitella_sp" & species != "Potamogeton_pusillus"& species != "Potamogeton_zosteriformis"& species !=  "Potamogeton_nodosus"& species !=  "Heteranthera_dubia")
 
 #create distinct shape, color, and line combos for species so they are distinguishable
-shps <- c(
-  "Ceratophyllum_demersum"
-  ,"Egeria_densa"             
-  ,"Elodea_canadensis"       
-  ,"Myriophyllum_spicatum"    
-  ,"Najas_guadalupensis"      
-  ,"Potamogeton_crispus"     
-  ,"Potamogeton_foliosus"     
-  ,"Potamogeton_richardsonii" 
-  ,"Stuckenia_filiformis"    
-  ,"Stuckenia_pectinata" 
+scol <- c(
+  "Ceratophyllum_demersum"= "red"
+  ,"Egeria_densa"=            "orange" 
+  ,"Elodea_canadensis"=       "yellow"
+  ,"Myriophyllum_spicatum"=    "green"
+  ,"Najas_guadalupensis" =     "blue"
+  ,"Potamogeton_crispus" =    "purple"
+  ,"Potamogeton_foliosus" =    "pink"
+  ,"Potamogeton_richardsonii" ="brown"
+  ,"Stuckenia_filiformis"=    "black"
+  ,"Stuckenia_pectinata" = "tan"
           )
 
+sshp <- c(
+  "Ceratophyllum_demersum"= "21"
+  ,"Egeria_densa"=            "22" 
+  ,"Elodea_canadensis"=       "23"
+  ,"Myriophyllum_spicatum"=    "24"
+  ,"Najas_guadalupensis" =     "25"
+  ,"Potamogeton_crispus" =    "21"
+  ,"Potamogeton_foliosus" =    "22"
+  ,"Potamogeton_richardsonii" ="23"
+  ,"Stuckenia_filiformis"=    "24"
+  ,"Stuckenia_pectinata" = "25"
+)
+
+
+
+
 (plot_spp_avg_score_line <-ggplot(norareg
-                                   , aes(x=date, y= avg_score, group=species, color=species,line=group,point=group))+
+          , aes(x=date, y= avg_score, group=species, color=species
+                #,linetype=species
+                ,shape=species))+
     #2014 fluridone treatment
     geom_rect(aes(xmin = as.Date("2014-03-01", format = '%Y-%m-%d'),
                   xmax = as.Date("2014-11-01", format = '%Y-%m-%d'),
@@ -261,10 +279,10 @@ shps <- c(
                   ymax = Inf),
               fill= 'gray75', color = 'gray75', alpha =0.9)+
     geom_errorbar(aes(ymin=avg_score-se_score, ymax=avg_score+se_score), width=30)+
-    geom_line(aes(linetype=group))+
-    geom_point(aes(shape=group))+
-    #scale_shape_manual(values=group, aesthetics = c("colour", "fill"))+
-    #scale_color_manual(values=cols, aesthetics = c("colour", "fill"))+
+    geom_line()+
+    geom_point()+
+    scale_shape_manual(values=c(21,22,23,24,25,21,22,23,24,25))+
+    #scale_color_manual(values=scol, aesthetics = c("colour", "fill"))+
     #scale_color_brewer(palette = "Set3")+ #colors are fairly  distinctive but many too light to show up well
     ylab("Mean Abundance Score") + xlab("Date")+  
     facet_wrap(~group,nrow=3)
