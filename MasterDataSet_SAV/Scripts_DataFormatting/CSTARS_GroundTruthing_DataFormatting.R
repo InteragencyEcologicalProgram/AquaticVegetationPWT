@@ -39,6 +39,12 @@ library(lubridate) #formatting dates
 # Data set is on SharePoint site for the 
 # Delta Smelt Resiliency Strategy Aquatic Weed Control Action
 
+#just start with 2021
+#data on github
+#this isn't working yet
+#veg17 <- read_csv("https://github.com/InteragencyEcologicalProgram/AquaticVegetationPWT/blob/main/MasterDataSet_SAV/Data_Raw/CSTARS_GroundTruthing/Delta202107_fieldpoints.csv?raw=true")
+
+
 # Define path on SharePoint site for data
 # I synced this folder to my OneDrive
 sharepoint_path_read <- normalizePath(
@@ -48,9 +54,12 @@ sharepoint_path_read <- normalizePath(
   )
 )  
 
+#not working
+#veg17 <- read_csv("Data_Raw/CSTARS_GroundTruthing/Suisun202107_fieldpoints.csv")
+
 #Create character vector of all point data files
 #there is also line data but we can work with that later
-pt_data_list <- dir(path = sharepoint_path_read, pattern = "\\_fieldpoints.dbf", full.names = T, recursive=T)
+#pt_data_list <- dir(path = sharepoint_path_read, pattern = "\\_fieldpoints.dbf", full.names = T, recursive=T)
 
 #Combine all of the data files into a single df
 #column types generally match across data sets
@@ -62,19 +71,19 @@ pt_data_list <- dir(path = sharepoint_path_read, pattern = "\\_fieldpoints.dbf",
   #so we can incorporate the 2016 df
 #  mutate(Rake_Teeth= as.integer(str_replace(Rake_Teeth,pattern = "%", replacement = ""))) %>% 
 #  glimpse()
-sav_pt_data_most <- pt_data_list[2:6] %>%
+#sav_pt_data_most <- pt_data_list[2:6] %>%
   #set_names() grabs the file names
-  set_names() %>%  
+## set_names() %>%  
   #reads in the files, .id adds the file name column
-  map_dfr(~read.dbf(.x), .id = "source") %>% 
+  #map_dfr(~read.dbf(.x), .id = "source") %>% 
   #reduce file name to just the needed info (ie, year)
-  mutate(year = as.integer(str_sub(source,-22,-19))
-         ,month = as.integer(str_sub(source,-18,-17))
+  #mutate(year = as.integer(str_sub(source,-22,-19))
+        # ,month = as.integer(str_sub(source,-18,-17))
          #remove the "%" from the Rake_Teeth column of the 2017-2021 df
          #so we can incorporate the 2016 df
-         ,Rake_Teeth= as.integer(str_replace(Rake_Teeth,pattern = "%", replacement = ""))
+         #,Rake_Teeth= as.integer(str_replace(Rake_Teeth,pattern = "%", replacement = ""))
          ) %>% 
-  glimpse()
+ # glimpse()
 
 #see how consistent column names are across years
 #ie, are there extra columns created simply because of naming inconsistencies
@@ -82,14 +91,14 @@ sav_pt_data_most <- pt_data_list[2:6] %>%
 
 #read in 2016 data separately
 #sav_pt_data16 <- read.dbf(file = paste0(sharepoint_path_read,"./Delta201610_fieldPointLines/Delta201610_fieldpoints.dbf"))
-sav_pt_data16 <- read.dbf(pt_data_list[1]) %>% 
+#sav_pt_data16 <- read.dbf(pt_data_list[1]) %>% 
   #add year and month columns 
-  add_column(year = as.integer("2016")
-             ,month = as.integer("10")
-             )
+ # add_column(year = as.integer("2016")
+    #         ,month = as.integer("10")
+    #         )
 
 #combine 2016 df with 2017-2021 df
-sav_all <- bind_rows(sav_pt_data16,sav_pt_data_most)
+#sav_all <- bind_rows(sav_pt_data16,sav_pt_data_most)
 #names(sav_all) 
 
 #Rake spp data formatting-------------
