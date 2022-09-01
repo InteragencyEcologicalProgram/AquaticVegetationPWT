@@ -1,0 +1,6 @@
+ucd_id,sepro_id,pt_dist_m,northing,easting,date,time,feat,rake_teeth,rake_speci,rake_spec2,rake_spec3,rake_spec4,rake_spec5,rake_spec6,rake_spec7,rake_spec8,rake_spec9,rake_spe10,tot_cover_spp,rake_teeth_logical,tot_cover_spp_logical,rake_diff
+24,15,16.9889817075,4210284.006,622534.317,2022-07-29,12:43:42pm,SAV,100,NA,0,NA,0,NA,0,NA,0,NA,0,0,1,0,1
+29,65,9.87725063504,4212103.362,622189.342,2022-07-29,01:09:03pm,SAV,10,SAV-Snaiad,0,NA,0,NA,0,NA,0,NA,0,0,1,0,1
+38,37,7.35906133569,4211002.91,623976.875,2022-07-29,01:46:38pm,SAV,0,SAV-Richardson,50,SAV-Egeria,50,NA,0,NA,0,NA,0,100,0,1,1
+39,27,9.61949060367,4210637.491,623630.102,2022-07-29,01:50:02pm,SAV,0,SAV-Snaiad,50,SAV-Curlyleaf,50,NA,0,NA,0,NA,0,100,0,1,1
+42,17,3.29852648061,4210286.52,623266.38,2022-07-29,02:04:46pm,SAV,0,SAV-Snaiad,100,NA,0,NA,0,NA,0,NA,0,100,0,1,1
