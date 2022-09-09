@@ -13,10 +13,19 @@ library(sf) #work with GPS coordinates
 library(janitor) #make column names tidier
 library(foreign) #read dbf files
 library(lubridate) #formatting dates
+library(deltamapr) #Sam's package with shapefiles for delta waterways
+library(plotrix) #standard error function
 
 # Read in the data----------------------------------------------
+
+#2022 Franks Tract data collected by CSTARS in July
 franks22 <- read.dbf("Data_Raw/CSTARS_GroundTruthing/FranksTract_2022/FTgrid_2022_distance.dbf")
 #glimpse(franks22)
+
+#Sepro survey grid
+#CRS is WGS 84; already contains a geometry column
+sepro <- st_read("Data_Raw/sepro_franks_tract/Franks Points.gpx")  
+#glimpse(sepro)
 
 #Format the data -----------------
 
@@ -178,37 +187,119 @@ ft_wider <- ft_wide %>%
   select(-c(rake_spec)) %>% 
   #pivot wider
   pivot_wider(names_from = "species", values_from = "rake_prop")  
-  #change CRS of sample coordinates
-  #specify the CRS of original coordinate
-  #confirmed that it is UTM NAD 83 (Zone 10N) (EPSG = 26910)
-  #st_as_sf(coords = c("easting", "northing"), crs = 26910) %>%
-  #then transform to WGS84
-  #st_transform(4236) %>% 
-  #then convert from geometry to columns
-  #mutate(latitude_wgs84 = unlist(map(geometry,2)),
-   #      longitude_wgs84 = unlist(map(geometry,1))) %>% 
-  #drop the geometry column
-  #st_set_geometry(NULL) %>% 
-  #mutate(across(c(time),as.character)) %>% 
-
+  
 #add non-SAV back into main data set
 ft_all_clean <- bind_rows(ft_wider,ft_nonsav) %>% 
   arrange(sepro_id)
   
-#write final data frame to csv file
+#write final sepro formatted data frame to csv file
 #write_csv(ft_all_clean,file = "Data_Raw/CSTARS_GroundTruthing/FranksTract_2022/FranksTract_2022_formatted.csv")
+
+#format final long form data 
+#NOTE: this data set doesn't include the three non-SAV samples
+ft_longer <- ft_wider %>% 
+  pivot_longer(cols=Richardson:Unknown #select range of columns
+               , names_to = "species" #specify column name
+               , values_to = "perc") %>% #specify column name
+  mutate(
+    #species present in trace amounts are indicated with perc = 0; change this from 0 to 1
+    #then change all NAs for perc to 0, indicating species absence
+    perc_trace = case_when(perc==0 ~ 1,is.na(perc)~0,TRUE ~ perc)
+    #add column that calculates absolute rake coverage by spp within sample
+    ,rake_index = (rake_teeth/100)*(perc_trace/100)) %>% 
+  glimpse()
+
+#create summary data frame
+ft_longer_sum <- ft_longer %>% 
+  #calculate summary stats by species
+  group_by(species) %>% 
+  summarize(
+    rake_mean = mean(rake_index)
+    ,rake_se = std.error(rake_index)
+    #,rake_n = count()
+    , .groups = 'drop'
+  )
 
 #Make map of the points-------------
 
-#plot the sepro grid and the UCD points
-#color the UCD points by veg type
-#read in sepro grid data file
-#copy code that makes sepro map
-#maybe move this file to the drought barrier repo
+#look at WW_Delta base map CRS
+#st_crs(WW_Delta)
+#CRS = NAD83, which is different than our sample data points
+#EPSG: 4269
+
+#add geometry to UCD coordinates
+ft_all_geo <- ft_all_clean %>% 
+  #specify the CRS of original coordinate
+  #confirmed that it is UTM NAD 83 (Zone 10N) (EPSG = 26910)
+  st_as_sf(coords = c("easting_26910", "northing_26910"), crs = 26910) %>%
+  #then transform to NAD83, which is CRS of base layer
+  st_transform(4269) %>% 
+  glimpse()
+   
+#2017-2020 GPX file: transform coordinates to base layer CRS
+seprog <- sepro %>% 
+  st_transform(crs = 4269) #transform to NAD83
+
+#create map comparing CSTARS and Sepro survey grids
+(map_both_grids <- ggplot()+
+    #plot waterways base layer
+    geom_sf(data= WW_Delta, fill= "lightsteelblue1", color= "black") +
+    #plot the Sepro grid (n=100)
+    geom_sf(data= seprog, fill= "black", color= "black", shape= 23, size= 4) +
+    #plot the CSTARS grid, which is most of the odd numbered sepro points (n = 45)
+    geom_sf(data= ft_all_geo, aes(fill= feat), color= "black", shape= 21, size= 3) +
+    scale_fill_manual(
+      name = "CSTARS Veg Type",
+      labels=c('SAV','Tule','Water Primrose'),
+      values=c("deepskyblue","darkolivegreen1","gold")
+    )+
+    #zoom in on region of delta where samples were collected
+    #just eyeballed the range from google maps
+    coord_sf( 
+      xlim =c(-121.56, -121.64),
+      ylim = c(38.07, 38.02)
+    )+
+    theme_bw()+
+    ggtitle('CSTARS Survey: July 29, 2022')
+)
+#ggsave(file = "Data_Raw/CSTARS_GroundTruthing/FranksTract_2022/FranksTract_2022_CSTARS_SePRO.png",type ="cairo-png",width=10, height=7,units="in",dpi=300)
+
+#create map showing CSTARS rake sample size
+(map_sav_size <- ggplot()+
+    #plot waterways base layer
+    geom_sf(data= WW_Delta, fill= "lightsteelblue1", color= "black") +
+    #plot the CSTARS SAV with point size representing sample size
+    geom_sf(data= ft_all_geo, fill= "deepskyblue", color= "black", shape= 21, aes(size= rake_teeth)) +
+    #zoom in on region of delta where samples were collected
+    #just eyeballed the range from google maps
+    coord_sf( 
+      xlim =c(-121.56, -121.64),
+      ylim = c(38.07, 38.02)
+    )+
+    theme_bw()+
+    ggtitle('CSTARS Survey: July 29, 2022')
+)
+#ggsave(file = "Data_Raw/CSTARS_GroundTruthing/FranksTract_2022/FranksTract_2022_CSTARS_RakeSampleSize.png",type ="cairo-png",width=10, height=7,units="in",dpi=300)
 
 #Summarize the community composition----------
 
-#format a final long version for export in data formatting section above
+#make histogram of total rake cover
+
+
+#plot species mean abundances ordered by mean prop of rake covered
+(plot_spp_score_avg <-ggplot(ft_longer_sum, aes(x=fct_reorder(species,-rake_mean), y= rake_mean))+
+   geom_bar(stat = "identity") + 
+   geom_errorbar(aes(ymin=rake_mean-rake_se, ymax=rake_mean+rake_se), width = 0.2) +
+   ylab("Mean proportion of rake head covered") + xlab("Species") 
+)
+#ggsave(file = "Data_Raw/CSTARS_GroundTruthing/FranksTract_2022/FranksTract_2022_CSTARS_SppAbundance.png",type ="cairo-png",width=8, height=5,units="in",dpi=300)
+
+
+
+
+
+
+
 
   
   
