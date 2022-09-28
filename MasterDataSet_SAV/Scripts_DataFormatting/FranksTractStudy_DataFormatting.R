@@ -16,13 +16,19 @@
 #weighted, double-headed, 0.33 m wide rake,
 #which was dragged for ~ 3 m along the bottom
 
-#rake coverage scoring key
+#Ordinal scoring system changed in 2019
+#Prior to that year, ordinal scores were 1-4, and starting that year, scores were 1-5
+#current ordinal score key:
 # 0 = 0%
 #	1 = 1-19%
 #	2 = 20-39%
 #	3 = 40-59%
 #	4 = 60-79%
 #	5 = 80-100%
+
+#Looks like maybe someone collected total rake cover in 2019 but no other year. 
+#It looks like that column of data is simply carried forward in 2020 and 2021 
+#(ie, numbers in this column don’t change so aren't real data)
 
 # Helpful resources----------
 
@@ -40,77 +46,69 @@ library(deltamapr) #Sam's package with shapefiles for delta waterways
 # Data set is on SharePoint site for the 
 # Delta Smelt Resiliency Strategy Aquatic Weed Control Action
 
-# Define path on SharePoint site for data
-# I synced this folder to my OneDrive
-sharepoint_path_read <- normalizePath(
-  file.path(
-    Sys.getenv("USERPROFILE"),
-    "California Department of Water Resources/DWR - DSRS Aquatic Weed Control Action - MasterDataSet_SAV/Franks_Tract"
-  )
-)  
-
 #GPS coordinates for 2014 from Excel
 #data author confirmed that these are the same points used for 2016
 #the 2014 points overlap with the 2015 points but still 100 points for 2015 missing
 #CRS is most likely WGS84
-gps14e <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2014.xlsx"), range="eGERIA!A1:C101")
+gps14e <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2014.xlsx", range="eGERIA!A1:C101")
+
 
 #GPS coordinates for 2014 from GPX file
 #after overlaying both sets of 2014 coordinates on a map below, it's clear these 
 #sets of points are the same
-gps14g <- st_read(paste0(sharepoint_path_read,"./FT Survey Oct 2014 oDD SITES.gpx"))
+gps14g <- st_read("./Data_Raw/sepro_franks_tract/FT Survey Oct 2014 oDD SITES.gpx")
 #throws a warning but looks OK
-gps14g #Geodetic CRS:  WGS 84
+#gps14g #Geodetic CRS:  WGS 84
 
 #GPS coordinates for 2017-2020 from GPX file
 #it is known that the same locations were sampled across these four years
 #these is another set of coordinates for this year range in some of the excel files
 #after overlaying both sets of 2017-2020 coordinates on a map below, it's clear these 
 #sets of points are the same
-gps17g <- st_read(paste0(sharepoint_path_read,"./Franks Points.gpx"))
+gps17g <- st_read("./Data_Raw/sepro_franks_tract/Franks Points.gpx")
 #throws a warning but looks OK
-gps17g #Geodetic CRS:  WGS 84
+#gps17g #Geodetic CRS:  WGS 84
 
 #2014
 #collected 10/7/2014
 #GPS coordinates in other tab (i.e., eGERIA)
-d14 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2014.xlsx"), range="Sheet1!A4:I104")
+d14 <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2014.xlsx", range="Sheet1!A4:I104")
 
 #2015
 #collected 10/13/2015
 #GPS coordinates in other tabs (i.e., eGERIA 2014, Richardson's pw 2014)
-d15 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2015.xlsx"), range="2015 data!A4:K204")
+d15 <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2015.xlsx", range="2015 data!A4:K204")
 
 #2016
 #collected 10/3/2016
 #GPS coordinates in other tabs (i.e., eGERIA 2014, Richardson's pw 2014)
-d16 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2016.xlsx"), range="2016!A4:K49")
+d16 <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2016.xlsx", range="2016!A4:K49")
 
 #2017
 #collected 10/10/2017
 #GPS coordinates available and imported with SAV data but different format from those for 2014
-d17 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2017.xlsx"), range="2017 Data!E4:U104")
+d17 <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2017.xlsx", range="2017 Data!E4:U104")
 
 #2018
 #excel file says 10/2/2018 but Jones & Thum 2021 says 10/3/2018
 #GPS coordinates available and imported with SAV data but different format from those for 2014
-d18 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2018.xlsx"), range="2018 Data!E4:T104")
+d18 <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2018.xlsx", range="2018 Data!E4:T104")
 
 #2019
 #says 10/2/2018 which was carried over from 2018 file
 #data author said it was 10/1/2019
 #GPS coordinates available and imported with SAV data but different format from those for 2014
-d19 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2019.xlsx"), range="2019 Data!E4:U104")
+d19 <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2019.xlsx", range="2019 Data!E4:U104")
 
 #2020
 #collected 10/6/2020
 #no GPS coordinates in file
-d20 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2020.xlsx"), range="2020data!A4:N104")
+d20 <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2020.xlsx", range="2020data!A4:N104")
 
 #2021
 #collected 10/6/2021
 #no GPS coordinates in file
-d21 <- read_excel(path=paste0(sharepoint_path_read,"./Frank Tract Survey October 2021.xlsx"), range="Data!A4:P104")
+d21 <- read_excel("./Data_Raw/sepro_franks_tract/Frank Tract Survey October 2021.xlsx", range="Data!A4:P104")
 
 # Format data sets--------------
 
@@ -132,7 +130,6 @@ fgps17 <- gps17g %>%
   st_set_geometry(NULL) %>% 
   mutate(across(c("name"), as.numeric)) %>% 
   select(name,Latitude,Longitude)
-  
 #glimpse(fgps17)
 
 #format 2014
@@ -364,36 +361,40 @@ most_cleaner <- most %>%
 #some or all of these taxa might have been simply observed in water rather than collected on rake
 #decided to categorize these as "visual" rather than "rake-weighted" survey method
 #drop the hybrid note because this 2019 sample was not confirmed via genetics
+#9/28/2022: decided to just exclude "other" taxa from final data set
+#because visual species were not consistently recorded and also there is reason to believe
+#at least some of these were not actually observed but rather added to inflate the count of native
+#species (ie, they are not real data)
 
 # Making data frame with existing strings and their replacement
-tr <- data.frame(target = c("Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
-                 replacement = c("Nitella","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
+#tr <- data.frame(target = c("Nitella - 1","Leafy PW", "P. Fol","Flat Stem - 1","flatstem","Flatstem","hybrid"),
+#                 replacement = c("Nitella","Potamogeton_foliosus","Potamogeton_foliosus","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_zosteriformis","Potamogeton_crispus_x_Potamogeton_pusillus"))
 
 # Making the named replacement vector from tr
-replacements <- c(tr$replacement)
-names(replacements) <- c(tr$target)
+#replacements <- c(tr$replacement)
+#names(replacements) <- c(tr$target)
 
 #now format the other species df
-other <- most %>% 
-  select("Latitude","Longitude","date","station","Other Species") %>% 
-  rename("other_sp" = "Other Species") %>% 
+#other <- most %>% 
+#  select("Latitude","Longitude","date","station","Other Species") %>% 
+#  rename("other_sp" = "Other Species") %>% 
   #add column to indicate these were visual rather than rake observations
-  add_column("survey_method"="visual"
-             ,"sav_incidence"=1
-             ,"species_incidence"=1) %>% 
+#  add_column("survey_method"="visual"
+#             ,"sav_incidence"=1
+#             ,"species_incidence"=1) %>% 
   #drop all rows with NA
-  drop_na() %>%   #18 remaining
+#  drop_na() %>%   #18 remaining
   #remove all Nitella sp rows from 2017 comments to avoid double counting (n=7)
   #a column was created in original excel sheet to integrate these already
-  filter(!(other_sp=="Nitella 1" & date=="2017-10-10")) %>% 
+#  filter(!(other_sp=="Nitella 1" & date=="2017-10-10")) %>% 
   #clean up species names
-  mutate(species1 = str_replace_all(other_sp,pattern = replacements)) %>%
+#  mutate(species1 = str_replace_all(other_sp,pattern = replacements)) %>%
   #this taxa required a second round because there was so much variation in naming
-  mutate(species = str_replace_all(species1,"Nitella","Nitella_sp")) %>% 
+#  mutate(species = str_replace_all(species1,"Nitella","Nitella_sp")) %>% 
   #remove one unneeded algae row and one unconfirmed hybrid plant row
-  filter(species!="Lots of algae" & species!="Potamogeton_crispus_x_Potamogeton_pusillus") %>% 
+#  filter(species!="Lots of algae" & species!="Potamogeton_crispus_x_Potamogeton_pusillus") %>% 
   #drop unneeded columns
-  select(-c("other_sp","species1"))
+#  select(-c("other_sp","species1"))
 #glimpse(other)
 
 #check to see if all cases of visual observations are also cases in which SAV was detected in 
@@ -409,27 +410,27 @@ other <- most %>%
 #combine rake data with visual data
 #glimpse(most_cleaner)
 #glimpse(other)
-all_complete <- bind_rows(most_cleaner,other)
+#all_complete <- bind_rows(most_cleaner,other)
 #glimpse(all_complete)
 
 #look at range of abundance scores
-unique(all_complete$rake_coverage)
-hist(all_complete$rake_coverage)
-rare <- all_complete %>% 
+unique(most_cleaner$rake_coverage)
+hist(most_cleaner$rake_coverage) #note that score of 5 wasn't used until 2019
+rare <- most_cleaner %>% 
   filter(rake_coverage < 1)
 #there is one sample with score of 0.01 (Nitella)
 #fixed this below
 
 #look at rows with missing coordinates
 #should just be in 2015
-coords <- all_complete %>% 
-  filter(is.na(Longitude))
+#coords <- most_cleaner %>% 
+#  filter(is.na(Longitude))
 #look at date of these observations
-unique(coords$date) #"2015-10-13" - all from 2015 as expected
+#unique(coords$date) #"2015-10-13" - all from 2015 as expected
 
 #final formatting
 #includes some samples from 2015 without coordinates
-final <- all_complete %>% 
+final <- most_cleaner %>% 
   #change a single case of rake_coverage_ordinal from"0.01" to "1"
   #this had been typed into original excel file as "1%"
   mutate(rake_coverage_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)) %>% 
@@ -453,25 +454,17 @@ final <- all_complete %>%
 
 
 #see if the no SAV samples were preserved properly
-#n=29 I think across full time series
 #sum rake scores within samples and filter to show which sum to zero
 no_sav <- final %>% 
   group_by(station, date) %>% 
   summarize(sav_tot = sum(rake_coverage_ordinal)) %>% 
   filter(sav_tot ==0) %>% 
   arrange(date,station)
-#29 samples as expected
+#32 samples 
 
-# Define path on SharePoint site for output files
-# I synced this folder to my OneDrive
-sharepoint_path_write <- normalizePath(
-  file.path(
-    Sys.getenv("USERPROFILE"),
-    "California Department of Water Resources/DWR - DSRS Aquatic Weed Control Action - MasterDataSet_SAV/Clean&Formatted"
-  )
-) 
+
 #version with some missing coordinates for 2015
-#write_csv(final,file = paste0(sharepoint_path_write,"/FranksTractManagement_2014-2021_formatted.csv"))
+#write_csv(final,"./Data_Formatted/FranksTractManagement_2014-2021_formatted.csv")
 
 #create version with 2015 samples that are missing coordinates removed
 final_coords_complete <- final %>% 
