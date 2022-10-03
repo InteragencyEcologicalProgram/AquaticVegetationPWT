@@ -2,6 +2,7 @@
 #Master data set
 #Submersed aquatic vegetation
 #CSTARS ground truthing
+#includes all Delta points but probably not Suisun Marsh points
 #raw data pulled from EDI
 
 #Nick Rasmussen
@@ -19,6 +20,11 @@ sav_rake <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=
   #automatically clean column name format
   clean_names()
 #glimpse(sav_rake)
+
+#look at date range
+range(sav_rake$date,na.rm=T)
+#"2007-10-29" "2021-09-13"
+#NOTE: apparently there are some NAs for date
 
 #format data set for integration
 #will create two tables
@@ -73,7 +79,7 @@ check <- rake_format %>%
 #all are cases in which rake_teeth is non-zero while there is no spp specific cover data
 #nearly all are rake_teeth = 100% with no spp specific cover
 #in some cases, there are helpful notes but should just send these to Shruti who has the sample photos
-
+#write_csv(check,"Data_Raw/CSTARS_GroundTruthing/CSTARS_rakes_mismatches.csv")
 
 
 
