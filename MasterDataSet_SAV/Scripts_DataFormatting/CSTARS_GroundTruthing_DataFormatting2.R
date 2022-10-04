@@ -9,9 +9,7 @@
 #Nick Rasmussen
 #nicholas.rasmussen@water.ca.gov
 
-#to do list----
-
-#fix duplicate for station 4148; could make them 4148.1 and 4148.2
+#Nick to do list-------
 
 #figure out difference between location and position_in columns
 
@@ -22,7 +20,10 @@
 
 #consider changing sago species to just genus
 
-#consider using four letter abbreviations for species names in all data sets
+
+#CSTARS to do list-------
+
+#fix duplicate for station 4148; could make them 4148.1 and 4148.2
 
 #fix the samples with missing dates. could just inpute the mean sampling date 
 #for that year and add a column that indicates if the true date or estimated one
@@ -76,6 +77,30 @@ station_check <- filter(sav_rake, (duplicated(orig_fid))) #one duplicate for 414
 #look at duplicates
 station_dup <- filter(sav_rake, orig_fid==4148)
 
+#create taxonomy table-------------
+#include six letter spp codes and latin names
+
+taxonomy <- as_tibble(
+  cbind(
+    "code" = c("EGEDEN","CERDEM","MYRSPI","POTNOD","POTCRI","STUPEC","CABCAR","ELOCAN","POTRIC"
+               ,"NAJGUA","POTPUS","ECHBER","VALAUS","HETDUB")
+    ,"species" = c("Egeria_densa","Ceratophyllum_demersum","Myriophyllum_spicatum"
+                   ,"Potamogeton_nodosus","Potamogeton_crispus","Stuckenia_pectinata"
+                   ,"Cabomba_caroliniana","Elodea_canadensis","Potamogeton_richardsonii"
+                   ,"Najas_guadalupensis","Potamogeton_pusillus", "Echinodorus_berteroi"
+                   ,"Vallisneria_australis","Heteranthera_dubia")
+    ,"native" = c("n","n","n","y","n","y","n","y","y","y","y","y","n","y")
+  )
+  )
+
+taxonomy_final <- taxonomy %>% 
+  separate(species, into = (c("genus","specific_epithet")),sep ="_",remove=F) %>% 
+  arrange(species) %>% 
+  select(code,genus,specific_epithet,species,native)
+
+#write_csv(taxonomy_final,"Data_Formatted/cstars_taxonomy.csv")
+
+
 #format species level data -----------------
 
 rake_format <- sav_rake %>% 
@@ -86,27 +111,42 @@ rake_format <- sav_rake %>%
          ,latitude_wgs84 = latitude
          ,longitude_wgs84 = longitude
          ,rake_teeth = rk_tth
-         ,Egeria_densa = egeria
-         ,Ceratophyllum_demersum = coontail     
-         ,Myriophyllum_spicatum = watermilfoil 
+         ,EGEDEN = egeria
+         ,CERDEM = coontail     
+         ,MYRSPI = watermilfoil 
          ,algae        
-         ,Potamogeton_nodosus = am_pondweed 
-         ,Potamogeton_crispus = curlyleaf    
-         ,Stuckenia_pectinata = sago #maybe should be Stuckenia sp.       
-         ,Cabomba_caroliniana = cabomba      
-         ,Elodea_canadensis = elodea       
-         ,Potamogeton_richardsonii = richardson  
-         ,Najas_guadalupensis = snaiad       
-         ,Potamogeton_pusillus = ppusillus    
-         ,Echinodorus_berteroi = echinodorus  
-         ,Vallisneria_australis = ribbonweed   
-         ,Heteranthera_dubia = hdubia   
+         ,POTNOD = am_pondweed 
+         ,POTCRI = curlyleaf    
+         ,STUPEC = sago #maybe should be Stuckenia sp.       
+         ,CABCAR = cabomba      
+         ,ELOCAN = elodea       
+         ,POTRIC = richardson  
+         ,NAJGUA = snaiad       
+         ,POTPUS = ppusillus    
+         ,ECHBER = echinodorus  
+         ,VALAUS = ribbonweed   
+         ,HETDUB = hdubia  
          ,comments
+         #,Egeria_densa = egeria
+         #,Ceratophyllum_demersum = coontail     
+         #,Myriophyllum_spicatum = watermilfoil 
+         #,algae        
+         #,Potamogeton_nodosus = am_pondweed 
+         #,Potamogeton_crispus = curlyleaf    
+         #,Stuckenia_pectinata = sago #maybe should be Stuckenia sp.       
+         #,Cabomba_caroliniana = cabomba      
+         #,Elodea_canadensis = elodea       
+         #,Potamogeton_richardsonii = richardson  
+         #,Najas_guadalupensis = snaiad       
+         #,Potamogeton_pusillus = ppusillus    
+         #,Echinodorus_berteroi = echinodorus  
+         #,Vallisneria_australis = ribbonweed   
+         #,Heteranthera_dubia = hdubia   
   ) %>% 
   #create new column that calculates total rake coverage of spp
   #should all be either 0 or 100
   rowwise() %>% 
-  mutate(tot_cover_spp = sum(c_across(Egeria_densa:Heteranthera_dubia),na.rm=T)) %>% 
+  mutate(tot_cover_spp = sum(c_across(EGEDEN:HETDUB),na.rm=T)) %>% 
   #make new columns that will allow for comparison of rake coverage to spp level coverage
   #values for rake_teeth_logical and tot_cover_spp_logical should match
   #ie, both be zero or both be one; mismatch indicates errors
@@ -150,6 +190,12 @@ cover_count<-rake_format %>%
 #reasonable to see numbers like 0.01-0.03 or 1.01-1.03
 #probably shouldn't be numbers like 0.10-0.99 or 1.10-2.0
 
+#how many of these total proportions are clearly wrong
+cover_count2 <- cover_count %>% 
+  filter((tot_cover_spp > 0.03 & tot_cover_spp < 1.00)| tot_cover_spp > 1.03)
+sum(cover_count2$count) #138 samples
+#write_csv(cover_count,"Data_Raw/CSTARS_GroundTruthing/CSTARS_rake_prop_errors.csv")
+
 #look at samples with no SAV
 open_water <- rake_format %>% 
   filter(tot_cover_spp_logical==0)
@@ -160,7 +206,7 @@ open_water <- rake_format %>%
 rake_long <- rake_format %>% 
   #drop some unneeded columns
   select(-c(comments:rake_diff)) %>% 
-  pivot_longer(cols=c(Egeria_densa:Heteranthera_dubia)
+  pivot_longer(cols=c(EGEDEN:HETDUB)
                ,names_to = "species", values_to = "rake_prop") %>% 
   mutate(
     #add column that indicates whether any SAV was in sample
