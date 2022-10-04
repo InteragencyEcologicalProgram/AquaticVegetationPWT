@@ -2,39 +2,85 @@
 #Master data set
 #Submersed aquatic vegetation
 #CSTARS ground truthing
-#includes all Delta points but probably not Suisun Marsh points
+#includes all Delta points 
+#does not include Suisun Marsh points
 #raw data pulled from EDI
 
 #Nick Rasmussen
 #nicholas.rasmussen@water.ca.gov
 
+#to do list----
+
+#fix duplicate for station 4148; could make them 4148.1 and 4148.2
+
+#figure out difference between location and position_in columns
+
+#need to confirm time zone (PDT vs PST)
+
+#find out if open water rake samples were excluded from this data set
+#If so, I think they should be added back in to show where SAV is not present
+
+#consider changing sago species to just genus
+
+#consider using four letter abbreviations for species names in all data sets
+
+#fix the samples with missing dates. could just inpute the mean sampling date 
+#for that year and add a column that indicates if the true date or estimated one
+
+#one case of rake teeth = -1.11 which must be an error
+
+#fix the samples where it is indicated that SAV was present on the rake
+#but there's no corresponding spp level data
+
+#fix samples in which spp composition number don't add roughly to either 
+#zero or one
+
+
 # Packages--------
 library(tidyverse) #suite of data science tools
-library(sf) #work with GPS coordinates
 library(janitor) #make column names tidier
 library(lubridate) #formatting dates
+library(sf) #work with GPS coordinates
+library(deltamapr) #maps of the delta
 
-#read in data from EDI
+#read in data from EDI-----------
+
 #https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=1143
+
 sav_rake <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.1143.1&entityid=c818f952f9401a32678484fea246dc5a") %>% 
   #automatically clean column name format
   clean_names()
 #glimpse(sav_rake)
 
+#initial data exploration------------
+
 #look at date range
 range(sav_rake$date,na.rm=T)
 #"2007-10-29" "2021-09-13"
-#NOTE: apparently there are some NAs for date
+#NOTE: there are some NAs for date
 
-#format data set for integration
-#will create two tables
-#one that is patch level data
-#the other spp level data
+#look at rows with date = NA
+d_miss <- sav_rake %>% 
+  filter(is.na(date))  
+#13 samples from Sept 2019 missing date
+#note there is content in the yyyymm column for these samples
+#so if you delete this latter column there is no longer any indication
+#of when the sample was collected
 
-#format spp level data table
+#are all stations/field IDs unique
+sav_stations <-unique(sav_rake$orig_fid)
+#looks like they are unique
+
+station_check <- filter(sav_rake, (duplicated(orig_fid))) #one duplicate for 4148
+
+#look at duplicates
+station_dup <- filter(sav_rake, orig_fid==4148)
+
+#format species level data -----------------
+
 rake_format <- sav_rake %>% 
   #only keep spp level columns and rename them as needed
-  select(station = orig_fid
+  select(station = orig_fid #are these truly unique?
          ,date
          ,time_pst = time #check previous script to confirm time zone
          ,latitude_wgs84 = latitude
@@ -81,6 +127,144 @@ check <- rake_format %>%
 #in some cases, there are helpful notes but should just send these to Shruti who has the sample photos
 #write_csv(check,"Data_Raw/CSTARS_GroundTruthing/CSTARS_rakes_mismatches.csv")
 
+#histogram showing all SAV rake cover values
+#should all be between 0 and 1
+hist(rake_format$rake_teeth)
+range(rake_format$rake_teeth)
+#-1.11  1.00
+#overall looks very good but why negative numbers?
+
+#take a closer look at negative numbers for rake teeth
+rake_neg <- rake_format %>% 
+  filter(rake_teeth < 0)
+#one sample that has negative value (ie, -1.11)
+
+#histogram showing sum of all spp coverage on rake
+#should be either 0 or 100
+hist(rake_format$tot_cover_spp)
+cover_count<-rake_format %>%
+  group_by(tot_cover_spp) %>%
+  summarize(count = n())
+#most are either zero or 100 but there are various others
+#spp present at trace amounts are included as 0.01 so
+#reasonable to see numbers like 0.01-0.03 or 1.01-1.03
+#probably shouldn't be numbers like 0.10-0.99 or 1.10-2.0
+
+#look at samples with no SAV
+open_water <- rake_format %>% 
+  filter(tot_cover_spp_logical==0)
+#111 cases but in all cases rake_teeth >0
+#maybe open water samples excluded from data set
+
+#convert to long format
+rake_long <- rake_format %>% 
+  #drop some unneeded columns
+  select(-c(comments:rake_diff)) %>% 
+  pivot_longer(cols=c(Egeria_densa:Heteranthera_dubia)
+               ,names_to = "species", values_to = "rake_prop") %>% 
+  mutate(
+    #add column that indicates whether any SAV was in sample
+    sav_incidence = case_when(rake_teeth > 0 ~ 1, 
+                                   rake_teeth == 0 ~ 0)
+    #add column indicating whether a species was present in a sample
+    ,species_incidence = case_when(rake_prop > 0 ~ 1, 
+                                        rake_prop == 0 ~ 0)
+    #format rake teeth column; sav_rake_prop is probably clearer name
+    ,sav_rake_prop = num(rake_teeth,digits=2)
+    #rename column with species data too
+    ,species_prop = num(rake_prop,digits=2)
+         ) %>% 
+  #add a couple columns 
+  add_column(program = "CSTARS"
+             ,survey_method = "rake_weighted") %>% 
+  #reorder columns
+  select(program,station, latitude_wgs84, longitude_wgs84, date, time_pst
+         ,survey_method,sav_incidence,sav_rake_prop,species,species_incidence,species_prop) %>% 
+  glimpse()
 
 
+#examine samples with no SAV
+water <- rake_long %>% 
+  filter(sav_incidence == 0 | sav_rake_prop==0)
+#no cases which has to be wrong
+#unless they were excluded from the EDI data set, there should be some 
+  
+#make sure all ssp numbers are in 0-1 range
+hist(rake_long$species_prop)
+#looks good but hard to see non-zero bars due to high zero bar
+hist(rake_long$species_prop[rake_long$species_prop!=0])
+sp_cover_count<-rake_long %>%
+  group_by(species_prop) %>%
+  summarize(count = n())
+#more unique values than expected 
+#no ideal because of inconsistecies in degree of rounding
+#but probably no that big an issue as long as they are accurate
 
+#format the sample level data----------------------
+
+sample_format <- sav_rake %>% 
+  select(station = orig_fid
+         ,date
+         ,time_pst = time 
+         ,latitude_wgs84 = latitude
+         ,longitude_wgs84 = longitude
+         ,patch_length_m = pat_len
+         ,patch_width_m = pat_wid
+         ,location
+         ,position_in
+         ,preassigned
+         ,dep_to_sav   
+         ,secchi       
+         ,sc_at_bot 
+         ,rk_tth #this is also in the species level data table
+         ) %>% 
+  mutate(depth_to_sav_m = num(dep_to_sav*0.3048,digits = 2)
+         ,secchi_depth_m = num(secchi*0.3048,digits = 2)
+  )
+
+#explore patch length and width columns
+unique(sample_format$patch_length_m)
+unique(sample_format$patch_width_m)
+#text is awkward but consistent for both
+
+#explore the location and position_in columns
+#are they non-overlapping?
+position_check <- sample_format %>% 
+  filter(is.na(location) & is.na(position_in))
+#438 cases in which both are NA
+position_check2 <- sample_format %>% 
+  filter(!is.na(location) & !is.na(position_in))
+#2256 cases of data in both columns and they don't always match
+#ask Shruti to explain
+
+#map the coordinates -------------------
+#make sure there are no obvious errors
+
+sav_geo <- sav_rake %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>% 
+  #add year column
+  mutate(year=as.factor(str_sub(yyyymm,1,4)))
+
+
+#create object from bounding box for the stations
+#add a buffer around points to improve map aesthetic
+#NOTE: this takes a long time to run 
+bbox_p <- st_bbox(st_buffer(sav_geo,2000))
+
+#look at WW_Delta base map CRS
+#st_crs(WW_Delta)
+#CRS = NAD83, which is different than our sample data points
+WW_Delta_4326 <- st_transform(WW_Delta, crs = 4326)
+
+(sav_map_ <- ggplot()+
+    #plot waterways base layer
+    geom_sf(data= WW_Delta_4326, fill= "skyblue3", color= "black") +
+    #plot station locations using different colors for different years
+    geom_sf(data= sav_geo, aes(fill= year, color=year), size= 2)+
+    #set bounding box for site
+    coord_sf(
+      xlim = c(bbox_p$xmin, bbox_p$xmax),
+      ylim = c(bbox_p$ymin, bbox_p$ymax)
+    ) +
+    theme_bw()
+)
