@@ -13,6 +13,11 @@
 
 #figure out difference between location and position_in columns
 
+#consider adding the program as a prefix to station to make sure it is unique
+#when combined with other data sets
+
+#decide what to call "algae"; all other categories are six letter codes
+
 #need to confirm time zone (PDT vs PST)
 
 #find out if open water rake samples were excluded from this data set
@@ -23,18 +28,25 @@
 
 #CSTARS to do list-------
 
-#fix duplicate for station 4148; could make them 4148.1 and 4148.2
+#fix duplicate for station 4148
+#for now, I made them 4148.1 and 4148.2
 
-#fix the samples with missing dates. could just inpute the mean sampling date 
-#for that year and add a column that indicates if the true date or estimated one
+#fix the Fall 2019 samples with missing dates
+#for now, I inputed the middle date for the period (10/4/19) 
 
 #one case of rake teeth = -1.11 which must be an error
+#for now, I just made it positive 1.11
 
 #fix the samples where it is indicated that SAV was present on the rake
 #but there's no corresponding spp level data
+#for now, I will drop these from the data set
 
 #fix samples in which spp composition number don't add roughly to either 
 #zero or one
+#for now, I will leave them in as is
+
+#for station 1081, depth to sav has a bunch of junk in it
+#for now, I just made this cell NA
 
 
 # Packages--------
@@ -48,34 +60,75 @@ library(deltamapr) #maps of the delta
 
 #https://portal.edirepository.org/nis/mapbrowse?scope=edi&identifier=1143
 
-sav_rake <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.1143.1&entityid=c818f952f9401a32678484fea246dc5a") %>% 
+sav_rake_data <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.1143.1&entityid=c818f952f9401a32678484fea246dc5a") %>% 
   #automatically clean column name format
   clean_names()
-#glimpse(sav_rake)
+#glimpse(sav_rake_data)
 
 #initial data exploration------------
 
 #look at date range
-range(sav_rake$date,na.rm=T)
+range(sav_rake_data$date,na.rm=T)
 #"2007-10-29" "2021-09-13"
 #NOTE: there are some NAs for date
 
 #look at rows with date = NA
-d_miss <- sav_rake %>% 
+d_miss <- sav_rake_data %>% 
   filter(is.na(date))  
 #13 samples from Sept 2019 missing date
 #note there is content in the yyyymm column for these samples
 #so if you delete this latter column there is no longer any indication
 #of when the sample was collected
 
+#look at range of 2019 dates so we can consider a reasonable date to inpute for NAs
+sav19 <- sav_rake_data %>% 
+  #add year column
+  mutate(year=as.factor(str_sub(yyyymm,1,4))) %>% 
+  filter(year==2019 & date > "2019-06-01") %>% 
+  distinct(date)
+#fall 2019 dates are all within 10/1-10/10
+#we'll use 10/4 because it's the middle date
+
 #are all stations/field IDs unique
-sav_stations <-unique(sav_rake$orig_fid)
+sav_stations <-unique(sav_rake_data$orig_fid)
 #looks like they are unique
 
-station_check <- filter(sav_rake, (duplicated(orig_fid))) #one duplicate for 4148
+station_check <- filter(sav_rake_data, (duplicated(orig_fid))) #one duplicate for 4148
 
 #look at duplicates
-station_dup <- filter(sav_rake, orig_fid==4148)
+station_dup <- filter(sav_rake_data, orig_fid==4148)
+
+
+#fix issues in columns used by both species and sample data tables----------
+#a duplicated station number
+#missing dates
+#a sample with negative rake abundance (-1.11)
+
+sav_rake <- sav_rake_data %>%
+  mutate(
+    #inpute dates for the missing Fall 2019 dates
+    date2 = case_when(is.na(date) ~ ymd("2019-10-04"),TRUE ~ date)
+    #deal with duplicate station names
+    ,station = case_when(orig_fid==4148 & pat_len=="M (5-10m)" ~ 4148.1
+                         ,orig_fid==4148 & pat_len=="XL (>15m)"~ 4148.2
+                         , TRUE ~ orig_fid)
+    #to get rid of negative rake value, just use absolute value of all numbers
+    ,rake_teeth = abs(rk_tth)
+  )
+  
+#look at rows with date = NA again
+d_miss2 <- sav_rake %>% 
+  filter(is.na(date2))
+#dates are fixed
+
+#look at station duplicates again
+station_dup2 <- filter(sav_rake, orig_fid==4148)
+#change worked
+
+#is the negative rake value fixed
+hist(sav_rake_data$rk_tth)
+hist(sav_rake$rake_teeth)
+#yes it's fixed
 
 #create taxonomy table-------------
 #include six letter spp codes and latin names
@@ -101,16 +154,16 @@ taxonomy_final <- taxonomy %>%
 #write_csv(taxonomy_final,"Data_Formatted/cstars_taxonomy.csv")
 
 
-#format species level data -----------------
+#format rake level data -----------------
 
 rake_format <- sav_rake %>% 
   #only keep spp level columns and rename them as needed
-  select(station = orig_fid #are these truly unique?
-         ,date
-         ,time_pst = time #check previous script to confirm time zone
+  select(station 
+         ,date = date2
+         ,time_pdt = time #check previous script to confirm time zone
          ,latitude_wgs84 = latitude
          ,longitude_wgs84 = longitude
-         ,rake_teeth = rk_tth
+         ,rake_teeth
          ,EGEDEN = egeria
          ,CERDEM = coontail     
          ,MYRSPI = watermilfoil 
@@ -153,7 +206,10 @@ rake_format <- sav_rake %>%
   mutate(rake_teeth_logical = if_else(rake_teeth > 0, 1,0)
          ,tot_cover_spp_logical = if_else(tot_cover_spp > 0, 1,0)
          ,rake_diff = rake_teeth_logical-tot_cover_spp_logical
-  )
+  ) %>% 
+  #for now, remove cases where mismatch between rake teeth and rake diff (n=110)
+  #at some point, Shruti needs to check the sample photos to fix these
+  filter(rake_diff==0)
 
 #look for cases in which values for rake_teeth_logical and tot_cover_spp_logical don't match
 #note that I made corrections to some of the rake_teeth above but those would still show up
@@ -166,6 +222,7 @@ check <- rake_format %>%
 #nearly all are rake_teeth = 100% with no spp specific cover
 #in some cases, there are helpful notes but should just send these to Shruti who has the sample photos
 #write_csv(check,"Data_Raw/CSTARS_GroundTruthing/CSTARS_rakes_mismatches.csv")
+#for now, just removed these in code above
 
 #histogram showing all SAV rake cover values
 #should all be between 0 and 1
@@ -178,6 +235,7 @@ range(rake_format$rake_teeth)
 rake_neg <- rake_format %>% 
   filter(rake_teeth < 0)
 #one sample that has negative value (ie, -1.11)
+#fixed this in code above
 
 #histogram showing sum of all spp coverage on rake
 #should be either 0 or 100
@@ -224,10 +282,18 @@ rake_long <- rake_format %>%
   add_column(program = "CSTARS"
              ,survey_method = "rake_weighted") %>% 
   #reorder columns
-  select(program,station, latitude_wgs84, longitude_wgs84, date, time_pst
+  select(program,station, latitude_wgs84, longitude_wgs84, date, time_pdt
          ,survey_method,sav_incidence,sav_rake_prop,species,species_incidence,species_prop) %>% 
+  arrange(station,species) %>% 
   glimpse()
 
+#final check for missing data
+rake_na <- rake_long %>% 
+  filter_all(any_vars(is.na(.)))
+#just some missing times, which is fine
+
+#export final file
+#write_csv(rake_long,"Data_Formatted/cstars_groundtruthing_rake.csv")
 
 #examine samples with no SAV
 water <- rake_long %>% 
@@ -245,13 +311,14 @@ sp_cover_count<-rake_long %>%
 #more unique values than expected 
 #no ideal because of inconsistecies in degree of rounding
 #but probably no that big an issue as long as they are accurate
+#leave these as they are for now
 
-#format the sample level data----------------------
+#format the patch level data----------------------
 
-sample_format <- sav_rake %>% 
-  select(station = orig_fid
-         ,date
-         ,time_pst = time 
+patch_format <- sav_rake %>% 
+  select(station 
+         ,date = date2
+         ,time_pdt = time 
          ,latitude_wgs84 = latitude
          ,longitude_wgs84 = longitude
          ,patch_length_m = pat_len
@@ -262,26 +329,70 @@ sample_format <- sav_rake %>%
          ,dep_to_sav   
          ,secchi       
          ,sc_at_bot 
-         ,rk_tth #this is also in the species level data table
          ) %>% 
-  mutate(depth_to_sav_m = num(dep_to_sav*0.3048,digits = 2)
-         ,secchi_depth_m = num(secchi*0.3048,digits = 2)
-  )
+  mutate(
+    #delete one cell for depth to sav because it contains a bunch of characters
+    depth_to_sav = case_when(station==1081 ~ as.numeric(NA)
+                                , TRUE ~ as.numeric(dep_to_sav))
+    #convert feet to meters
+    ,depth_to_sav_m = num(depth_to_sav*0.3048,digits = 2)
+    ,secchi_m = num(secchi*0.3048,digits = 2)
+    ) %>% 
+  #add a couple columns 
+  add_column(program = "CSTARS")  %>% 
+  #drop unneeded columns and reorder columns
+  select(program
+         ,station
+         ,latitude_wgs84
+         ,longitude_wgs84
+         ,date
+         ,time_pdt
+         ,preassigned
+         ,depth_to_sav_m
+         ,patch_length_m
+         ,patch_width_m
+         ,location
+         ,position_in
+         ,secchi_m  
+         ,secchi_at_bottom = sc_at_bot
+         ) %>% 
+  arrange(station) %>% 
+  glimpse()
+
+#export patch table
+#write_csv(patch_format,"Data_Formatted/cstars_groundtruthing_patch.csv")
 
 #explore patch length and width columns
-unique(sample_format$patch_length_m)
-unique(sample_format$patch_width_m)
+unique(patch_format$patch_length_m)
+unique(patch_format$patch_width_m)
 #text is awkward but consistent for both
 
 #explore the location and position_in columns
 #are they non-overlapping?
-position_check <- sample_format %>% 
+position_check <- patch_format %>% 
   filter(is.na(location) & is.na(position_in))
 #438 cases in which both are NA
-position_check2 <- sample_format %>% 
+position_check2 <- patch_format %>% 
   filter(!is.na(location) & !is.na(position_in))
 #2256 cases of data in both columns and they don't always match
 #ask Shruti to explain
+
+#plot the two depth columns
+hist(patch_format$depth_to_sav_m)
+range(patch_format$depth_to_sav_m,na.rm=T) 
+#-0.91  3.05, why negative numbers? above water line?
+
+#look closer at negative depths
+sav_depth <- patch_format %>% 
+  filter(depth_to_sav_m<0)
+sav_depth <- patch_format %>% 
+  filter(station==1081)
+#one case; looks like a bunch of data was put into one cell
+#removed contents of this cell above (ie, made NA)
+
+hist(patch_format$secchi_m)
+range(patch_format$secchi_m,na.rm=T) 
+#0.00 19.20
 
 #map the coordinates -------------------
 #make sure there are no obvious errors
