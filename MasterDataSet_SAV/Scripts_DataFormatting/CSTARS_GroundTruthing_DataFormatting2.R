@@ -17,6 +17,8 @@
 #when combined with other data sets
 
 #decide what to call "algae"; all other categories are six letter codes
+#Dan uses a code called "FILALG" for filamentous algae which could work 
+#assumes all CSTARS algae is filamentous algae though
 
 #need to confirm time zone (PDT vs PST)
 
