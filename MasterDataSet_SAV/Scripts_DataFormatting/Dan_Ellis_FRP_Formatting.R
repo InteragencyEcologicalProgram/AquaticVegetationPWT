@@ -1,10 +1,8 @@
-[3:42 PM] Ellis, Daniel@Wildlife
 # FRP SAV Rake - Vegetation Data merge
 
 # Written/Edited by Daniel Ellis
 # Last edits: 05 OCT 2022
 
-setwd("C:/Users/dellis/OneDrive - California Department of Fish and Wildlife/Documents/IEP/Projects/SAV/Final Data from Sav rakes- FRP")
 
 # Bring in appropriate libraries
 library(readxl)
@@ -20,7 +18,9 @@ csv.sample = read.csv("Sample.csv", quote = "")
 csv.sv = read.csv("SiteVisit.csv", quote = "")
 
 # Cut data down to that needing merging
-sample.merge = csv.sample[,c(which(colnames(csv.sample)=="SampleID_frp"),which(colnames(csv.sample)=="SampleID_key"),which(colnames(csv.sample)=="VisitNo"))]
+sample.merge = csv.sample[,c(which(colnames(csv.sample)=="SampleID_frp")
+                             ,which(colnames(csv.sample)=="SampleID_key")
+                             ,which(colnames(csv.sample)=="VisitNo"))]
 
 # Merge site VisitNo to sample data
 sample = merge(sample, sample.merge, by = "SampleID_frp", all.x = T )

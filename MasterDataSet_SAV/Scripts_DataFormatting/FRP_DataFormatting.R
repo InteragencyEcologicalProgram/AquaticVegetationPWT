@@ -11,18 +11,12 @@
 
 #Nick to do list---------------
 
-#why are there non-SAV species in samples?
-#there are some that are rakelike but not true rake samples
-#as part of invert surveys
+#what are units for weight? grams?
+
+#difference between veg categories: OTHER, UNKNO, SAVGEN
 
 #are species that are included as zeros trace amounts?
 #supposed to be a ones but could be a zero
-
-#whats the difference between NADA and OPEWAT
-#According to Dan, effectively they are interchangeable
-
-#There is one sample that includes Hydrilla
-#clearly this is an error, so just delete the sample
 
 # Packages--------
 library(tidyverse) #suite of data science tools
@@ -103,7 +97,7 @@ veg_format <- left_join(frp_veg ,frp_code) %>%
   #drop unneeded columns
   select(
     visit_no = vist_no
-    ,sample_id_key
+    ,sample_id = sample_id_key
     ,vegetation_id
     ,species_code = vegetation_code
     ,type = vegetation_type
@@ -117,14 +111,16 @@ veg_format <- left_join(frp_veg ,frp_code) %>%
 
 #look at hydrilla sample
 hydrilla <- veg_format %>% 
-  filter(sample_id_key==6902)
-#90% is "hydrilla"; maybe just throw this sample out
+  filter(sample_id==6902)
+#90% is "hydrilla"; clearly an error
+#this sample also includes Azolla (FAV) so it gets dropped out of final data set
+#which is good
 
 #look at OPEWAT samples
 water<-veg_format %>% 
   filter(species_code=="OPEWAT") %>% 
   arrange(area)
-#for vegetation_id 4036, the sample_id (3445) is incorrectly in the sample_id_key column
+#for vegetation_id 4036, the sample_id (3445) is incorrectly in the sample_id column
 
 #look at example of sample with open water
 water_ex<-veg_format %>% 
@@ -136,46 +132,150 @@ spp_occur <- veg_format %>%
   summarise(count= n()) %>% 
   arrange(type,-count)
 
-#seems like what we want to do is start by filtering out all samples for which there is no SAV
-#ie, all species in the sample are type = o
-#then look at cases where samples are a mix of type = o | s
-#keep all samples with all species of type = s
+#probably should filter out any samples that aren't just SAV
+#need to summarize samples by veg type first
 type_sum <-veg_format %>% 
-  group_by(sample_id_key,type) %>% 
+  group_by(sample_id,type) %>% 
   summarise(count=n()) %>% 
-  arrange(sample_id_key) %>% 
+  arrange(sample_id) %>% 
   pivot_wider(names_from = type ,values_from = count)
 
 #sav only samples
+#keep these
 sav_only <- type_sum %>% 
-  filter(!is.na(s) & is.na(o))
+  filter(!is.na(s) & is.na(o)& is.na(f)) %>% 
+  pull(sample_id)
 #1421 samples
 1421/1864 #76%
 
+#sav + fav only samples
+#consider keeping these
+sav_fav <-  type_sum %>% 
+  filter(!is.na(s) & is.na(o)& !is.na(f))
+#6 samples so not much loss in tossing them
+
+#sav + other
+#toss
+sav_other <- type_sum %>% 
+  filter(!is.na(s) & !is.na(o)& is.na(f))
+#245 samples
+
+#fav samples
+#toss these
+fav_only <- type_sum %>% 
+  filter(is.na(s) & is.na(o) & !is.na(f))
+#12 samples
+12/1864 #0.6%
+
 #other only samples
+#toss these
 other_only <- type_sum %>% 
-  filter(is.na(s) & !is.na(o))
+  filter(is.na(s) & !is.na(o) & is.na(f))
 #175 samples with only other species (not sav)
-175/1864 #9%
+160/1864 #9%
+
+#all types
+#toss
+mixed <-type_sum %>% 
+  filter(!is.na(s) & !is.na(o) & !is.na(f))
+#17 samples
+
+#format SAV only samples------------------
+
+sav_only_samples <- veg_format %>% 
+  filter(sample_id %in% sav_only) %>%
+  #change percent to proportion
+  mutate(species_prop = area/100
+         ,species = case_when(species_code == "ELODIA" ~ "ELOCAN"
+                              ,species_code == "OPEWAT"~ "EMPTY"
+                              ,species_code == "NADA" ~ "EMPTY"
+                              ,TRUE ~ species_code)
+         ) %>% 
+  #drop unneeded columns: visit_no (all NAs),type (all SAV now), area (replaced by species_prop),
+  #species code (replaced by species), 
+  #heath_code (lots missing and remaining are strings of multiple categories - mostly healthy)
+  select(sample_id
+         ,vegetation_id
+         ,species
+         ,species_prop
+         #,health_code
+         ,biomass_fresh = wet_weight #what are units?
+         ,biomass_dry = dry_weight #what are units?
+      )
+
+#look closer at columns with lots of NAs
+#health <- sav_only_samples %>% 
+#  filter(!is.na(health_code))
+#many cells contain multiple health codes separated by semi colon
+#mostly healthy
+#for now just leave this column out
+
+#did this fiter work correctly? are there 1421 unique sample_id?
+#sav_check <-unique(sav_only_samples$sample_id)
+#yes 
 
 
-#mixed samples
-mixed <- type_sum %>% 
-  filter(!is.na(s) & !is.na(o))
-#268 samples
-268/1864 #14%
+#look at non-specific SAV categories
+misc <- sav_only_samples %>% 
+  filter(species == "OTHER" | species == "UNKNO" | species == "SAVGEN") %>% 
+  arrange(species)
+#only two cases of SAVGEN and they are 100% of sample in both cases to just drop those samples
 
-#within sample_id_key
+#look closer at OTHER and UNKNO
+misc_more <- sav_only_samples %>% 
+  select(sample_id,species,species_prop) %>% 
+  pivot_wider(id_cols = sample_id,names_from = species,values_from = species_prop)
+
+#look at duplicates
+sav_dup <- sav_only_samples%>%
+  dplyr::group_by(sample_id, species) %>%
+  dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+  dplyr::filter(n > 1L) %>% 
+  pull(sample_id)
+
+#look at samples with duplicates
+sav_dup_samp <- sav_only_samples %>% 
+  filter(sample_id %in% sav_dup)
+
+
+
+#additional SAV formatting and cleaning
+sav_format <-sav_only_samples %>% 
+  #drop rows that are complete duplicates (n=2)
+  distinct(sample_id,species,species_prop,biomass_fresh,biomass_dry) %>%
+  #drop samples that are entirely or almost entirely OTHER (n=2)
+  filter(!(sample_id== 8874 | sample_id== 8875)) %>% 
+  #fix one duplicate by summarizing by sample and species
+  group_by(sample_id,species) %>% 
+  summarize(species_prop2 = sum(species_prop)
+            #I don't think either biomass will change
+            ,biomass_fresh2 = sum(biomass_fresh)
+            ,biomass_dry2 = sum(biomass_dry)
+            , .groups = "drop") %>% 
+  glimpse()
+  #lost the biomass columns though
+  
+#look at samples with duplicates
+sav_dup_samp2 <- sav_format %>% 
+  filter(sample_id %in% sav_dup)
+
+  
+
 
 #should check to see if area % within a sample add to 100
 
 #create taxonomy table of just the SAV species in the field data--------
 
-taxonomy_field <- veg_format %>% 
-  distinct(species_code)
-#44 of 67 species in original vegetation code file
+taxonomy_field <- sav_format %>% 
+  distinct(species)
+#15 of 67 species in original vegetation code file
+#consider combining OTHER, UNKNO, SAVGEN which might effectively be all the same
+#also consider just dropping samples with these categories but should look at them first
+#UNKNO and OTHER might not even be SAV 
 
-taxonomy <- left_join(taxonomy_field,frp_code, by=c("species_code"="vegetation_code"),keep=F)
+
+
+#taxonomy <- left_join(taxonomy_field,frp_code, by=c("species_code"="vegetation_code"),keep=F)
 #definitely stuff in here that isn't SAV
 #are these all rake samples or is this all survey data
 
