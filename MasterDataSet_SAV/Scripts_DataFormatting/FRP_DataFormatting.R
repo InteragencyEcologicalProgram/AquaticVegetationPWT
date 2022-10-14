@@ -94,6 +94,11 @@ frp_code <-read_csv("Data_Raw/FRP/tables_all/VegetationCode.csv")%>%
 #hist(frp_veg$wet_weight)
 #hist(frp_veg$dry_weight)
 
+#look at rows with mass
+vmass1 <- frp_veg %>% 
+  filter(vegetation_code_id== 28 & (!is.na(wet_weight) | !is.na(dry_weight)))
+#write_csv(vmass1,"./Data_Raw/FRP/data_issues/frp_nada_masses.csv")
+
 #look at visit and sample IDs
 #I think these columns are used interchangeably
 #any cases of number in both visit and sample in same row?
@@ -186,6 +191,11 @@ mixed <-type_sum %>%
 
 submersed_only_samples <- veg_format %>% 
   filter(sample_id %in% sav_only)
+
+#explore rows with wet or dry mass values
+#includes NADA category which doesn't make sense because that's no veg
+vmass <- submersed_only_samples %>% 
+  filter(species_code=="NADA" & (!is.na(wet_weight) | !is.na(dry_weight)))
 
 #how many NADA and OPEWAT with value of 1?
 trace_wat <- submersed_only_samples %>% 
