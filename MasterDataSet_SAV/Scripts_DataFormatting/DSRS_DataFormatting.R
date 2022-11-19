@@ -6,8 +6,12 @@
 
 #To do list-----------
 
+#decide where to put survey_method column
+#should be at program level but for now more practical in sample level
+
 #as starting point, using tidy format with different tables for info
 #consider making a version that is one big flat file so users don't have to do joining
+#the exercise of combining all the separate tables would be a good QAQC check too
 
 #add station number as a column because this was a repeated measures study
 #problem is that probably wasn't recorded so would have to do some spatial analysis to figure it out
@@ -118,16 +122,23 @@ site_level <- sav_rake %>%
 #write_csv(site_level,"./Data_Formatted/dsrs_site.csv")
 
 #Format sample level data---------------
+#this table is useful for folks who just want to know about SAV abundance (not spp)
 #site, date, lat, long, total biomass
 #decided to leave out survey_month column (eg, 2017_06)
 
 sample_level <- sav_rake %>% 
   #automatically clean column name format
   clean_names() %>% 
-  #convert mass from kg to g for consistency across data sets
-  mutate(total_biomass_fresh_g = total_wet_biomass_kg*1000) %>% 
+  mutate(
+    #add column that indicates sampling method
+    survey_method = "rake_thatch"
+    #convert mass from kg to g for consistency across data sets
+    ,total_biomass_fresh_g = total_wet_biomass_kg*1000
+    #create column that indicates whether there was SAV in a sample
+    ,sav_incidence = case_when(total_biomass_fresh_g==0~0,TRUE~1)
+         ) %>% 
   #only keep needed columns
-  select(site_code=site,sample,sample_date=date,sample_latitude_wgs84=latitude,sample_longitude_wgs84=longitude,total_biomass_fresh_g)
+  select(site_code=site,sample,survey_method,sample_date=date,sample_latitude_wgs84=latitude,sample_longitude_wgs84=longitude,sav_incidence,total_biomass_fresh_g)
 
 #export table
 #write_csv(sample_level,"./Data_Formatted/dsrs_sample.csv")
@@ -145,14 +156,18 @@ species_level <- sav_rake %>%
   select(sample,Total_Wet_Biomass_kg,Egeria_densa:Cabomba_caroliniana) %>% 
   #convert wide to long
   pivot_longer(cols=(Egeria_densa:Cabomba_caroliniana),names_to = "species",values_to = "rake_cover_percent") %>% 
-  #create new column with estimated species specific biomass 
-  mutate(biomass_fresh_estimated_g = (Total_Wet_Biomass_kg*1000) * (rake_cover_percent/100)) %>% 
+  mutate(
+    #create new column with estimated species specific biomass 
+    biomass_fresh_estimated_g = (Total_Wet_Biomass_kg*1000) * (rake_cover_percent/100)
+    #create column that indicates whether a species was present in a sample
+    ,species_incidence = case_when(rake_cover_percent==0~0,TRUE~1)
+    ) %>% 
   #add the species name abbrev.
   left_join(sp_names) %>% 
   #automatically clean column name format
   clean_names() %>%
   #only keep the needed columns and rename code as species
-  select(sample,species_code = code,rake_cover_percent,biomass_fresh_estimated_g)
+  select(sample,species_code = code,species_incidence,rake_cover_percent,biomass_fresh_estimated_g)
 
 #look for cases in which names didn't join properly (ie, code = NA)
 #name_na <- species_level %>% 
@@ -162,6 +177,17 @@ species_level <- sav_rake %>%
 #export table
 #write_csv(species_level,"./Data_Formatted/dsrs_sample_species.csv")
 
+#Create summmary of number of samples in which each species was present-------------
+#just need to export the list of taxa
+#will use this to indicate which taxa were found in this survey
 
+sp_prev <- species_level %>% 
+  #filter out cases of spp absences
+  filter(species_incidence!=0) %>% 
+  group_by(species_code) %>% 
+  summarize(dsrs = sum(species_incidence))
+
+#export table
+#write_csv(sp_prev,"./Data_Formatted/dsrs_spp_summary.csv")
 
 
