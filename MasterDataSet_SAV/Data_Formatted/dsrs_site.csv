@@ -1,0 +1,5 @@
+program,site,site_code,latitude,longitude,survey_start,survey_end,sav_control,control_tool
+DSRS,decker_island,DI,38.083739,-121.720128,2017-05-25,2018-12-19,y,fluridone
+DSRS,french_island,FI,38.273308,-121.698569,2017-05-26,2018-12-11,n,NA
+DSRS,little_hastings,LH,38.251514,-121.691939,2017-05-26,2018-12-11,y,fluridone
+DSRS,fishermans_cut,FC,38.077342,-121.647642,2018-04-17,2018-12-19,n,NA
