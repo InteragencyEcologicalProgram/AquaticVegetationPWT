@@ -1,4 +1,4 @@
-site_code,sample,survey_method,sample_date,sample_latitude_wgs84,sample_longitude_wgs84,sav_incidence,total_biomass_fresh_g
+site_code,sample_id,survey_method,sample_date,latitude_wgs84,longitude_wgs84,sav_incidence,total_biomass_fresh_g
 DI,DSRS1,rake_thatch,2017-05-25,38.08298879,-121.7239087,0,0
 DI,DSRS2,rake_thatch,2017-05-25,38.08307424,-121.7223954,1,700
 DI,DSRS3,rake_thatch,2017-05-25,38.08320284,-121.7233099,1,832

@@ -45,9 +45,9 @@ sav_rake_data <- read_csv("https://portal.edirepository.org/nis/dataviewer?packa
 fl_station <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=edi.1079.1&entityid=a8ca1295eace8c7709ef1c65eec16748") %>% 
   clean_names()
 
-#read in CSTARS species file to get the species abbreviations
-sav_taxonomy <- read_csv("./Data_Formatted/cstars_taxonomy.csv")
-#NOTE: all species in the DSRS samples are already in the cstars taxonomy file
+#read in species file to get the species codes
+sav_taxonomy <- read_csv("./Data_Formatted/taxonomy_all.csv") %>% 
+  select(species_code,species)
 
 #create sample IDs--------------------------
 #eventually should use the ID #s of the stations as part of this because it 
@@ -59,7 +59,7 @@ sav_rake <- sav_rake_data %>%
   mutate(
     program = "DSRS"
     ,number = seq(1:876)
-    ,sample = str_c(program,number)
+    ,sample_id = str_c(program,number)
     ) %>%
   glimpse()
 
@@ -138,7 +138,7 @@ sample_level <- sav_rake %>%
     ,sav_incidence = case_when(total_biomass_fresh_g==0~0,TRUE~1)
          ) %>% 
   #only keep needed columns
-  select(site_code=site,sample,survey_method,sample_date=date,sample_latitude_wgs84=latitude,sample_longitude_wgs84=longitude,sav_incidence,total_biomass_fresh_g)
+  select(site_code=site,sample_id,survey_method,sample_date=date,latitude_wgs84=latitude,longitude_wgs84=longitude,sav_incidence,total_biomass_fresh_g)
 
 #export table
 #write_csv(sample_level,"./Data_Formatted/dsrs_sample.csv")
@@ -147,13 +147,9 @@ sample_level <- sav_rake %>%
 #station, species specific rake cover and estimated wet mass
 #convert wide to long
 
-#first create version of taxonomy data with just names and name abbrev.
-sp_names <- sav_taxonomy %>% 
-  select(code,species)
-
 species_level <- sav_rake %>% 
   #only keep the needed columns
-  select(sample,Total_Wet_Biomass_kg,Egeria_densa:Cabomba_caroliniana) %>% 
+  select(sample_id,Total_Wet_Biomass_kg,Egeria_densa:Cabomba_caroliniana) %>% 
   #convert wide to long
   pivot_longer(cols=(Egeria_densa:Cabomba_caroliniana),names_to = "species",values_to = "rake_cover_percent") %>% 
   mutate(
@@ -163,11 +159,11 @@ species_level <- sav_rake %>%
     ,species_incidence = case_when(rake_cover_percent==0~0,TRUE~1)
     ) %>% 
   #add the species name abbrev.
-  left_join(sp_names) %>% 
+  left_join(sav_taxonomy) %>% 
   #automatically clean column name format
   clean_names() %>%
   #only keep the needed columns and rename code as species
-  select(sample,species_code = code,species_incidence,rake_cover_percent,biomass_fresh_estimated_g)
+  select(sample_id,species_code,species_incidence,rake_cover_percent,biomass_fresh_estimated_g)
 
 #look for cases in which names didn't join properly (ie, code = NA)
 #name_na <- species_level %>% 
@@ -177,7 +173,7 @@ species_level <- sav_rake %>%
 #export table
 #write_csv(species_level,"./Data_Formatted/dsrs_sample_species.csv")
 
-#Create summmary of number of samples in which each species was present-------------
+#Create summary of number of samples in which each species was present-------------
 #just need to export the list of taxa
 #will use this to indicate which taxa were found in this survey
 
@@ -189,5 +185,38 @@ sp_prev <- species_level %>%
 
 #export table
 #write_csv(sp_prev,"./Data_Formatted/dsrs_spp_summary.csv")
+
+#create flat file version of data----------------------------
+#combine all tables
+
+#reduce number of columns for site level
+#many of these are high level metadata columns that don't make sense when combined with rest of data
+site_trunc <- site_level %>% 
+  select(program,site,site_code)
+
+#combine site and sample tables using site code
+stsp <- right_join(site_trunc,sample_level) %>% 
+  select(-site_code)
+
+#add the species level data using sample ID
+all <- right_join(stsp,species_level)
+
+#export table
+#write_csv(all,"./Data_Formatted/dsrs_flatfile.csv")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

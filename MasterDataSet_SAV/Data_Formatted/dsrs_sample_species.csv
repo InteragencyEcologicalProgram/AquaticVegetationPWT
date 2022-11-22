@@ -1,4 +1,4 @@
-sample,species_code,species_incidence,rake_cover_percent,biomass_fresh_estimated_g
+sample_id,species_code,species_incidence,rake_cover_percent,biomass_fresh_estimated_g
 DSRS1,EGEDEN,0,0,0
 DSRS1,ELOCAN,0,0,0
 DSRS1,CERDEM,0,0,0
