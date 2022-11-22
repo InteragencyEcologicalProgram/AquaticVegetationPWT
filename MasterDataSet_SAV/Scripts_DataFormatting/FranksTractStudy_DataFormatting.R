@@ -16,7 +16,7 @@
 #weighted, double-headed, 0.33 m wide rake,
 #which was dragged for ~ 3 m along the bottom
 
-#Ordinal scoring system changed in 2019
+#IMPORTANT: Ordinal scoring system changed in 2019
 #Prior to that year, ordinal scores were 1-4, and starting that year, scores were 1-5
 #current ordinal score key:
 # 0 = 0%
@@ -43,8 +43,10 @@ library(sf) #importing gpx file and converting to data frame
 library(deltamapr) #Sam's package with shapefiles for delta waterways
 
 # Read in the data----------------------------------------------
-# Data set is on SharePoint site for the 
-# Delta Smelt Resiliency Strategy Aquatic Weed Control Action
+
+#read in taxonomy df to use the species codes in place of species names
+taxonomy <- read_csv("./Data_Formatted/taxonomy_all.csv") %>% 
+  select(species_code,species)
 
 #GPS coordinates for 2014 from Excel
 #data author confirmed that these are the same points used for 2016
@@ -341,9 +343,13 @@ most_cleaner <- most %>%
   #first create column that sums scores for all species in each sample
   rowwise() %>% 
   mutate(sav_tot = sum(c_across("Egeria_densa":"Heteranthera_dubia"),na.rm=T)) %>% 
-  #convert summed scores into no (0) or yes (1) dummy variables for SAV presence
-  mutate(sav_incidence = case_when(sav_tot > 0 ~ 1, 
-                        sav_tot == 0 ~ 0)) %>% 
+  mutate(
+    #convert summed scores into no (0) or yes (1) dummy variables for SAV presence
+    sav_incidence = case_when(sav_tot > 0 ~ 1, 
+                        sav_tot == 0 ~ 0)
+    #add a sample ID column by creating string with program abbrev., station id, and date
+    ,sample_id = str_c("FRK_",station,"_",date)
+    )  %>% 
   #convert data frame from wide to long
   pivot_longer(all_of(sav_col), names_to = "species", values_to = "rake_coverage") %>% 
   #add column for survey method; will distinguish between rake and visual observations
@@ -431,25 +437,30 @@ rare <- most_cleaner %>%
 #final formatting
 #includes some samples from 2015 without coordinates
 final <- most_cleaner %>% 
-  #change a single case of rake_coverage_ordinal from"0.01" to "1"
-  #this had been typed into original excel file as "1%"
-  mutate(rake_coverage_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)) %>% 
+  mutate(
+    #change a single case of rake_coverage_ordinal from"0.01" to "1"
+    #this had been typed into original excel file as "1%"
+    rake_coverage_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)
+    ) %>% 
   #add columns with program specific info
   add_column("program" = "Franks_Tract_Management") %>% 
   #rename some columns
-  rename("latitude_wgs84" = "Latitude"
-         ,"longitude_wgs84" = "Longitude") %>% 
+  rename(latitude_wgs84 = Latitude
+         ,longitude_wgs84 = Longitude) %>% 
+  #swap out species names for species codes
+  left_join(taxonomy) %>% 
   #reorder columns
-  select("program"
-         ,"station"
-         ,"latitude_wgs84"
-         ,"longitude_wgs84"
-         ,"date"
-         ,"sav_incidence"
-         ,"species"
-         ,"survey_method"
-         ,"species_incidence"
-         ,"rake_coverage_ordinal"
+  select(program
+         ,station
+         ,sample_id
+         ,latitude_wgs84
+         ,longitude_wgs84
+         ,date
+         ,sav_incidence
+         ,species_code
+         ,survey_method
+         ,species_incidence
+         ,rake_coverage_ordinal
   )
 
 
@@ -469,6 +480,20 @@ no_sav <- final %>%
 #create version with 2015 samples that are missing coordinates removed
 final_coords_complete <- final %>% 
   filter(!is.na(longitude_wgs84))
+
+#break data set up into tidy tables---------------------
+#tables: site, sample, species, taxonomy, herbicide use
+#come back to this at some point
+
+#site level
+#add site and site code
+#site_level <- final %>% 
+  
+#sample level
+#need to create a sample ID
+#sample_level <- final %>% 
+#  select(station,survey_method,date,latitude_wgs84,longitude_wgs84,sav_incidence)
+
 
 #auxillary data sets----------------
 #herbicide treatments and native/non-native species status
