@@ -443,7 +443,9 @@ final <- most_cleaner %>%
     rake_coverage_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)
     ) %>% 
   #add columns with program specific info
-  add_column("program" = "Franks_Tract_Management") %>% 
+  add_column("program" = "Franks_Tract_Management"
+             ,"site" = "franks_tract"
+             ) %>% 
   #rename some columns
   rename(latitude_wgs84 = Latitude
          ,longitude_wgs84 = Longitude) %>% 
@@ -451,11 +453,12 @@ final <- most_cleaner %>%
   left_join(taxonomy) %>% 
   #reorder columns
   select(program
+         ,site
          ,station
          ,sample_id
          ,latitude_wgs84
          ,longitude_wgs84
-         ,date
+         ,sample_date = date
          ,sav_incidence
          ,species_code
          ,survey_method
@@ -475,7 +478,7 @@ no_sav <- final %>%
 
 
 #version with some missing coordinates for 2015
-#write_csv(final,"./Data_Formatted/FranksTractManagement_2014-2021_formatted.csv")
+#write_csv(final,"./Data_Formatted/FranksTractManagement_flatfile.csv")
 
 #create version with 2015 samples that are missing coordinates removed
 final_coords_complete <- final %>% 
