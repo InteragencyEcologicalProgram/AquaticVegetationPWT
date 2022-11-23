@@ -4,7 +4,7 @@ CERDEM,Ceratophyllaceae,Ceratophyllum,demersum,Ceratophyllum_demersum,n
 ECHBER,,Echinodorus,berteroi,Echinodorus_berteroi,y
 EGEDEN,Hydrocharitaceae,Egeria,densa,Egeria_densa,n
 ELOCAN,,Elodea,canadensis,Elodea_canadensis,y
-EMPTY,NA,NA,NA,NA,NA
+EMPTY,NA,NA,NA,Empty,NA
 FILALG,NA,filamentous,algae,filamentous_algae,y
 HETDUB,,Heteranthera,dubia,Heteranthera_dubia,y
 MYRAQU,NA,Myriophyllum,aquaticum,Myriophyllum_aquaticum,n
@@ -19,5 +19,5 @@ POTRIC,NA,Potamogeton,richardsonii,Potamogeton_richardsonii,y
 POTZOS,,Potamogeton,zosteriformis,Potamogeton_zosteriformis,y
 STUFIL,,Stuckenia,filiformis,Stuckenia_filiformis,y
 STUPEC,Potamogetonaceae,Stuckenia,pectinata,Stuckenia_pectinata,y
-UNKNOW,NA,NA,NA,NA,NA
+UNKNOW,NA,NA,NA,Unknown,NA
 VALAUS,,Vallisneria,australis,Vallisneria_australis,n
