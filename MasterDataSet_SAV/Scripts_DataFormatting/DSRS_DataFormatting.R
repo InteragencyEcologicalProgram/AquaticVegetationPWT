@@ -131,7 +131,7 @@ sample_level <- sav_rake %>%
   clean_names() %>% 
   mutate(
     #add column that indicates sampling method
-    sample_method = "rake_thatch"
+    sample_method = "rake_handle"
     #convert mass from kg to g for consistency across data sets
     ,sav_mass_fresh_g = total_wet_biomass_kg*1000
     #create column that indicates whether there was SAV in a sample
