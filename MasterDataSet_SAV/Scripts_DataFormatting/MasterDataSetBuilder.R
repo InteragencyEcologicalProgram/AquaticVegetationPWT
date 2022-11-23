@@ -3,6 +3,11 @@
 #Submersed aquatic vegetation
 #Script that combines all formatted data sets into master data set
 
+#datasets included so far:
+#DSRS
+#FRANKS
+#BASS
+
 #Nick Rasmussen
 #nicholas.rasmussen@water.ca.gov
 
@@ -24,25 +29,30 @@ data_all <- list.files(path = "./Data_Formatted/",     # Identify all csv files 
 
 
 #reorder columns
-#NEED TO WORK ON THIS
 data_all_ord <- data_all %>% 
-  select("program"
-         ,"station"
-         #,"id"
-       , "date"
-       , "latitude_wgs84"
-       , "longitude_wgs84"
-       , "species"
-       , "survey_method"
-       #, "incidence"
-       ,"rake_coverage_ordinal"
-       , "biomass_fresh_g"
-       , "biomass_dry_g"
-       ,"density_fresh_g_m^2"
-       ,"density_dry_g_m^2"
-       , "water_depth_m"
-) %>% 
+  select(program
+         ,sample_method
+         ,site
+         ,station
+         ,sample_id
+         ,latitude_wgs84
+         ,longitude_wgs84
+         ,sample_date
+         ,water_depth_m
+         ,sav_incidence
+         ,sav_mass_fresh_g     
+         ,species_code
+         ,species_incidence
+         ,rake_cover_percent
+         ,rake_cover_ordinal
+         ,species_mass_fresh_g
+         ,species_mass_fresh_estimated_g
+         ,species_mass_dry_estimated_g
+         ,`species_density_fresh_g_m^2`
+         ,`species_density_dry_estimated_g_m^2`
+         ) %>% 
   glimpse()
 
-
+#write integrated data set file
+#write_csv(data_all_ord,"./Data_Formatted/sav_integrated_dataset.csv")
 
