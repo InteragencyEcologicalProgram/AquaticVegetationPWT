@@ -353,7 +353,7 @@ most_cleaner <- most %>%
   #convert data frame from wide to long
   pivot_longer(all_of(sav_col), names_to = "species", values_to = "rake_coverage") %>% 
   #add column for survey method; will distinguish between rake and visual observations
-  add_column("survey_method"="rake_weighted") %>% 
+  add_column("sample_method"="rake_rope") %>% 
   #replace NAs with zeros for rake_coverage
   replace_na(list("rake_coverage"=0))  %>% 
   #create a species incidence column
@@ -385,7 +385,7 @@ most_cleaner <- most %>%
 #  select("Latitude","Longitude","date","station","Other Species") %>% 
 #  rename("other_sp" = "Other Species") %>% 
   #add column to indicate these were visual rather than rake observations
-#  add_column("survey_method"="visual"
+#  add_column("sample_method"="visual"
 #             ,"sav_incidence"=1
 #             ,"species_incidence"=1) %>% 
   #drop all rows with NA
@@ -440,11 +440,11 @@ final <- most_cleaner %>%
   mutate(
     #change a single case of rake_coverage_ordinal from"0.01" to "1"
     #this had been typed into original excel file as "1%"
-    rake_coverage_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)
+    rake_cover_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)
     ) %>% 
   #add columns with program specific info
-  add_column("program" = "Franks_Tract_Management"
-             ,"site" = "franks_tract"
+  add_column("program" = "FRANKS"
+             ,"site" = "FRK"
              ) %>% 
   #rename some columns
   rename(latitude_wgs84 = Latitude
@@ -453,6 +453,7 @@ final <- most_cleaner %>%
   left_join(taxonomy) %>% 
   #reorder columns
   select(program
+         ,sample_method
          ,site
          ,station
          ,sample_id
@@ -461,24 +462,23 @@ final <- most_cleaner %>%
          ,sample_date = date
          ,sav_incidence
          ,species_code
-         ,survey_method
          ,species_incidence
-         ,rake_coverage_ordinal
+         ,rake_cover_ordinal
   )
 
 
 #see if the no SAV samples were preserved properly
 #sum rake scores within samples and filter to show which sum to zero
 no_sav <- final %>% 
-  group_by(station, date) %>% 
-  summarize(sav_tot = sum(rake_coverage_ordinal)) %>% 
+  group_by(station, sample_date) %>% 
+  summarize(sav_tot = sum(rake_cover_ordinal)) %>% 
   filter(sav_tot ==0) %>% 
-  arrange(date,station)
+  arrange(sample_date,station)
 #32 samples 
 
 
 #version with some missing coordinates for 2015
-#write_csv(final,"./Data_Formatted/FranksTractManagement_flatfile.csv")
+#write_csv(final,"./Data_Formatted/franks_flatfile.csv")
 
 #create version with 2015 samples that are missing coordinates removed
 final_coords_complete <- final %>% 
@@ -495,7 +495,7 @@ final_coords_complete <- final %>%
 #sample level
 #need to create a sample ID
 #sample_level <- final %>% 
-#  select(station,survey_method,date,latitude_wgs84,longitude_wgs84,sav_incidence)
+#  select(station,sample_method,sample_date,latitude_wgs84,longitude_wgs84,sav_incidence)
 
 
 #auxillary data sets----------------
@@ -510,15 +510,6 @@ treatment <- data.frame("year" = c(2006:2021)
 )
 #NOTE: have not integrated treatment data with rest of data
 #write_csv(treatment,file = paste0(sharepoint_path_write,"/FranksTractManagement_HerbicideTreatments.csv"))
-
-
-#create data set with native vs non-native status of all species
-spp <- unique(final$species)
-native <- data.frame("species" = c(spp)
-                     ,"native" = c("n","n",rep("y",10),"n","y","y")
-)
-#write_csv(native,file = paste0(sharepoint_path_write,"/FranksTractManagement_SpeciesOrigin.csv"))
-
 
 
 #map coordinates to compare them------------------
