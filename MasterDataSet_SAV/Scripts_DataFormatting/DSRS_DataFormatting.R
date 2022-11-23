@@ -6,7 +6,7 @@
 
 #To do list-----------
 
-#decide where to put survey_method column
+#decide where to put sample_method column
 #should be at program level but for now more practical in sample level
 
 #as starting point, using tidy format with different tables for info
@@ -131,14 +131,14 @@ sample_level <- sav_rake %>%
   clean_names() %>% 
   mutate(
     #add column that indicates sampling method
-    survey_method = "rake_thatch"
+    sample_method = "rake_thatch"
     #convert mass from kg to g for consistency across data sets
-    ,total_biomass_fresh_g = total_wet_biomass_kg*1000
+    ,sav_mass_fresh_g = total_wet_biomass_kg*1000
     #create column that indicates whether there was SAV in a sample
-    ,sav_incidence = case_when(total_biomass_fresh_g==0~0,TRUE~1)
+    ,sav_incidence = case_when(sav_mass_fresh_g==0~0,TRUE~1)
          ) %>% 
   #only keep needed columns
-  select(site_code=site,sample_id,survey_method,sample_date=date,latitude_wgs84=latitude,longitude_wgs84=longitude,sav_incidence,total_biomass_fresh_g)
+  select(site_code=site,sample_id,sample_method,sample_date=date,latitude_wgs84=latitude,longitude_wgs84=longitude,sav_incidence,sav_mass_fresh_g)
 
 #export table
 #write_csv(sample_level,"./Data_Formatted/dsrs_sample.csv")
@@ -154,7 +154,7 @@ species_level <- sav_rake %>%
   pivot_longer(cols=(Egeria_densa:Cabomba_caroliniana),names_to = "species",values_to = "rake_cover_percent") %>% 
   mutate(
     #create new column with estimated species specific biomass 
-    biomass_fresh_estimated_g = (Total_Wet_Biomass_kg*1000) * (rake_cover_percent/100)
+    species_mass_fresh_estimated_g = (Total_Wet_Biomass_kg*1000) * (rake_cover_percent/100)
     #create column that indicates whether a species was present in a sample
     ,species_incidence = case_when(rake_cover_percent==0~0,TRUE~1)
     ) %>% 
@@ -163,7 +163,7 @@ species_level <- sav_rake %>%
   #automatically clean column name format
   clean_names() %>%
   #only keep the needed columns and rename code as species
-  select(sample_id,species_code,species_incidence,rake_cover_percent,biomass_fresh_estimated_g)
+  select(sample_id,species_code,species_incidence,rake_cover_percent,species_mass_fresh_estimated_g)
 
 #look for cases in which names didn't join properly (ie, code = NA)
 #name_na <- species_level %>% 
@@ -195,11 +195,20 @@ site_trunc <- site_level %>%
   select(program,site,site_code)
 
 #combine site and sample tables using site code
-stsp <- right_join(site_trunc,sample_level) %>% 
-  select(-site_code)
+stsp <- right_join(site_trunc,sample_level)  %>% 
+  select(-site)
 
 #add the species level data using sample ID
-all <- right_join(stsp,species_level)
+all <- right_join(stsp,species_level) %>% 
+  select(program
+         ,sample_method
+         ,site = site_code
+         ,sample_id
+         ,latitude_wgs84
+         ,longitude_wgs84
+         ,sample_date
+         ,sav_incidence:species_mass_fresh_estimated_g
+         )
 
 #export table
 #write_csv(all,"./Data_Formatted/dsrs_flatfile.csv")
