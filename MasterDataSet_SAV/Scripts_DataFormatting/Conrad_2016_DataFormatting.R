@@ -3,6 +3,12 @@
 #Submersed aquatic vegetation
 #Conrad et al 2016 study
 
+#To do list--------
+
+#decide what to do about Stuckenia; probably just label all Stuckenia as S. pectinata
+#go through and decide what should be zeros vs NA for things like mass 
+#if species_incidence=1 and no mass, then NA; if species_incidence=0, then mass=0
+
 #Notes
 #are rake numbers within site same location across dates? Yes
 #need to confirm this by looking closer at data
@@ -26,22 +32,15 @@ library(sf) #convert GPS coordinate units
 library(deltamapr) #Sam's package with delta base layers
 
 # Read in the data----------------------------------------------
-# Data set is on SharePoint site for the 
-# Delta Smelt Resiliency Strategy Aquatic Weed Control Action
 
-# Define path on SharePoint site for data
-# I synced this folder to my OneDrive
-sharepoint_path <- normalizePath(
-  file.path(
-    Sys.getenv("USERPROFILE"),
-    "California Department of Water Resources/DWR - DSRS Aquatic Weed Control Action - MasterDataSet_SAV/Conrad_etal_2016"
-  )
-)  
+#read in the sav data from bass study 
+conrad <- read_excel(path="./Data_Raw/Conrad_etal_2016/bass_study_data.xlsx") %>%
+  clean_names() %>% 
+  glimpse()
 
-#read in the data 
-conrad <- read_excel(path=paste0(sharepoint_path,"./ConradEtAl_SAVRakeData_200810.xlsx")
-                     ,.name_repair = make_clean_names) #from janitor package
-#got some warnings; probably just for parts of data set with lots of NAs where there should be numbers
+#ready in taxonomy data set to get species codes
+taxonomy <- read_csv("./Data_Formatted/taxonomy_all.csv") %>% 
+  select(species,species_code)
 
 # Formatting data set--------------------
 
@@ -61,6 +60,9 @@ hist(as.numeric(conrad$depth))
 range(as.numeric(conrad$depth),na.rm = T) #0.1 14.8
 #rake handle is only 4.8 m long so exclude any depth measurements over 4.8 m
 
+#look at species richness
+hist(conrad$spp_rich)
+
 #start formatting
 cleaner <- conrad %>% 
   #drop samples with no-no rake
@@ -70,19 +72,20 @@ cleaner <- conrad %>%
   #drop cases where spp richness is NA because it indicates no presence/absence data for sample
   #note that sample type "yes" and "no-no SAV" aren't perfectly accurate so ignore them
   filter(!(is.na(spp_rich))) %>% 
-  #change depth column from logical to numeric
-  mutate(across(c("depth"), as.numeric)) %>% 
+  mutate(
+    #add sav incidence column
+    "sav_incidence" = case_when(spp_rich==0~0,spp_rich>0~1)
+    #change depth column from logical to numeric
+    ,across(c("depth"), as.numeric)
+    ) %>% 
   #drop any cases in which depth is above the rake handle length (max sampling depth)
   filter(depth < 4.8) %>% 
   #dropped unneeded columns
-  select(-c("rake_key"
-            ,"site_id"
-            ,"site_name"
-            ,"rake"
-            ,"feat_name"
-            ,"comment"
-            ,"spp_rich":"s_lineage"
-  )
+  select(
+    rake_id:easting
+    ,sav_incidence
+    ,depth:sample
+    ,egde:stfi_dw
   ) %>% 
   glimpse()
 
@@ -102,7 +105,7 @@ wet <- cleaner %>%
   select(c("rake_id",contains("_fw"))) %>% 
   pivot_longer(cols = c(egde_fw:stfi_fw), 
                names_to = "species1", 
-               values_to = "biomass_fresh_g" 
+               values_to = "species_mass_fresh_g" 
   ) %>% 
   #drop "_fw" from strings in species column
   mutate(species = str_replace_all(species1,"_fw","")) %>% 
@@ -114,7 +117,7 @@ dry <- cleaner %>%
   select(c("rake_id",contains("_dw"))) %>% 
   pivot_longer(cols = c(egde_dw:stfi_dw), 
                names_to = "species1", 
-               values_to = "biomass_dry_g" 
+               values_to = "species_mass_dry_estimated_g" 
   ) %>% 
   #drop "_dw" from strings in species column
   mutate(species = str_replace_all(species1,"_dw","")) %>% 
@@ -128,12 +131,12 @@ long <- list(pa,wet,dry) %>%
 
 #look at NAs for fresh biomass
 nsav_f<- long %>% 
-  filter(sample=="no-no SAV" & is.na(biomass_fresh_g)) 
+  filter(sample=="no-no SAV" & is.na(species_mass_fresh_g)) 
 #9 NAs; all from WOO_1_061410_R4
 
 #look at NAs for dry biomass
 nsav_d<- long %>% 
-  filter(sample=="no-no SAV" & is.na(biomass_dry_g)) 
+  filter(sample=="no-no SAV" & is.na(species_mass_dry_estimated_g)) 
 #9 NAs; all from WOO_1_061410_R4
 #WOO_1_061410_R4: needs NAs changed to zeros for fresh and dry
 #this is done in code below
@@ -148,7 +151,7 @@ unique(sav_pa$rake_id)
 
 #look at fresh biomass for all samples
 sav_f<- long %>% 
-  filter(is.na(biomass_fresh_g)) 
+  filter(is.na(species_mass_fresh_g)) 
 unique(sav_f$rake_id) #24 samples
 #20 samples from WOO_1 and VIC_1 6/14/2010, all but one of which should be NAs for wet and dry mass
 #exception: WOO_1_061410_R4 is a no SAV sample so we know mass is zeros for all species
@@ -157,7 +160,7 @@ unique(sav_f$rake_id) #24 samples
 
 #look at dry biomass for all samples
 sav_d<- long %>% 
-  filter(is.na(biomass_dry_g)) 
+  filter(is.na(species_mass_dry_estimated_g)) 
 unique(sav_d$rake_id) #22 samples
 #20 samples from WOO_1 and VIC_1 6/14/2010, all but one of which should be NAs for wet and dry mass
 #exception: WOO_1_061410_R4 is a no SAV sample so we know mass is zeros for all species
@@ -180,8 +183,9 @@ miss_date <- long %>%
 #change species nicknames to latin names
 
 # Making data frame with existing strings and their replacement
+#NOTE: made Stuckenia sp into Stuckenia pectinata; supposedly all Delta Stuckenia are S. pectinata; maybe should change S. filiformis too
 tr <- data.frame(target = c("egde",  "caca",  "pocr",  "mysp",  "cede",  "stspp", "elca",  "pono",  "stfi"),
-                 replacement = c("Egeria_densa","Cabomba_caroliniana","Potamogeton_crispus","Myriophyllum_spicatum","Ceratophyllum_demersum","Stuckenia_sp","Elodea_canadensis","Potamogeton_nodosus","Stuckenia_filiformis")
+                 replacement = c("Egeria_densa","Cabomba_caroliniana","Potamogeton_crispus","Myriophyllum_spicatum","Ceratophyllum_demersum","Stuckenia_pectinata","Elodea_canadensis","Potamogeton_nodosus","Stuckenia_filiformis")
                  )
 
 # Making the named replacement vector from tr
@@ -193,16 +197,16 @@ long_cleaner <- long %>%
   #one sample with NA for pa was were determined to be zero so convert from NA
   replace_na(list(pa=0)) %>% 
   #fresh and dry mass for this sample should be zeros instead of NAs (no SAV present)
-  mutate(across(.cols = c(biomass_fresh_g,biomass_dry_g),
+  mutate(across(.cols = c(species_mass_fresh_g,species_mass_dry_estimated_g),
                 .fns = ~case_when(rake_id == "WOO_1_061410_R4" 
                                   ~ as.numeric(0),
                                   TRUE ~ as.numeric(.x)))) %>% 
   #in this sample, one species was NA for fresh biomass but should be zero
-  mutate(across(.cols = c(biomass_fresh_g),
+  mutate(across(.cols = c(species_mass_fresh_g),
                 .fns = ~case_when(rake_id == "DIS_2_101209_R7" & species == "pocr" ~ as.numeric(0),
                                   TRUE ~ as.numeric(.x)))) %>% 
   #in this sample, one species was NA for fresh biomass but should be zero
-  mutate(across(.cols = c(biomass_fresh_g),
+  mutate(across(.cols = c(species_mass_fresh_g),
                 .fns = ~case_when(rake_id == "BIG_1_102009_R3" & species == "stfi" ~ as.numeric(0),
                                   TRUE ~ as.numeric(.x)))) %>% 
   #change species nicknames to latin names
@@ -214,18 +218,20 @@ long_cleaner <- long %>%
   #see if there is a logical way to fill in some of these
   filter(!is.na(easting) & !is.na(northing)) %>% 
   #rename some columns 
-  rename("id"="rake_id"
+  rename("sample_id"="rake_id"
          ,"water_depth_m" = "depth"
-         ,"incidence"="pa"
-         ,"species"="species1"
-         ,"date"="gps_date") %>% 
+         ,"species_incidence"="pa"
+         ,"species"="species1") %>% 
   #add columns that identify these data as part of this survey
-  add_column("program"=as.character("electrofishing_nearshore")
-             ,"survey_method"=as.character("rake_thatch")
+  add_column("program"=as.character("BASS")
+             ,"sample_method"=as.character("rake_handle")
              ) %>% 
-  #add density columns; divides mass by area sampled by rake (0.101 m^2)
-  mutate("density_fresh_g_m^2"=round((biomass_fresh_g/0.101),2)
-         ,"density_dry_g_m^2"=round((biomass_dry_g/0.101),2)
+  mutate(
+    #change datetime to date
+    "sample_date" = as_date(gps_date)
+    #add density columns; divides mass by area sampled by rake (0.101 m^2)
+    ,"species_density_fresh_g_m^2"=round((species_mass_fresh_g/0.101),2)
+    ,"species_density_dry_estimated_g_m^2"=round((species_mass_dry_estimated_g/0.101),2)
          ) %>% 
   #change CRS of sample coordinates
   #specify the CRS of original coordinate: UTM NAD 83 (Zone 10N) (EPSG = 26910)
@@ -237,27 +243,35 @@ long_cleaner <- long %>%
          longitude_wgs84 = unlist(map(geometry,1))) %>% 
   #drop the geometry column
   st_set_geometry(NULL) %>% 
+  #add species codes to replace species
+  left_join(taxonomy) %>% 
   #reorder columns
   select("program"
-         #,"id"
-         , "date"
+         , "sample_method"
+         ,"site" = "site_name"
+         ,"sample_id"
          , "latitude_wgs84"
          , "longitude_wgs84"
-         , "species"
-         , "survey_method"
-         #probably don't need "incidence" now
+         , "sample_date"
+         ,"sav_incidence"
+         , "species_code"
+         #probably don't need "species_incidence" now
          #this info should be captured by 0 or NA
          #but double check this 
-         #, "incidence" 
-         , "biomass_fresh_g"
-         , "biomass_dry_g"
-         ,"density_fresh_g_m^2"
-         ,"density_dry_g_m^2"
+         , "species_incidence" 
+         , "species_mass_fresh_g"
+         , "species_mass_dry_estimated_g"
+         ,"species_density_fresh_g_m^2"
+         ,"species_density_dry_estimated_g_m^2"
          , "water_depth_m"
          ) %>% 
   glimpse()
 
-#map all sampling locations
+#write the formatted dataset 
+#write_csv(long_cleaner,file = "./Data_Formatted/bass_flatfile.csv")
+
+
+#map all sampling locations-----------------------
 
 #look at WW_Delta base map CRS
 #st_crs(WW_Delta)
@@ -267,12 +281,12 @@ long_cleaner <- long %>%
 #prep sample coordinates for mapping
 gps <- long_cleaner %>% 
   #select needed columns
-  select("date" 
+  select("sample_date" 
          ,"latitude_wgs84"
          ,"longitude_wgs84"
   ) %>% 
   #reduce to just unique combinations of date and location
-  distinct(date,longitude_wgs84,latitude_wgs84) %>% 
+  distinct(sample_date,longitude_wgs84,latitude_wgs84) %>% 
   #converting coordinates back to sf object
   st_as_sf(coords = c(x='longitude_wgs84',y='latitude_wgs84') 
            ,crs = 4326
@@ -298,15 +312,7 @@ gps <- long_cleaner %>%
 #compared with map in Fig. 1 of Conrad et al 2016
 #sampling locations look correctly placed
 
-# Define path on SharePoint site for output files
-sharepoint_path_write <- normalizePath(
-  file.path(
-    Sys.getenv("USERPROFILE"),
-    "California Department of Water Resources/DWR - DSRS Aquatic Weed Control Action - MasterDataSet_SAV/Clean&Formatted"
-  )
-) 
-#write the formatted dataset to sharepoint site
-#write_csv(long_cleaner,file = paste0(sharepoint_path_write,"/NearshoreEfishing_2008-2010_formatted.csv"))
+
 
 
 
