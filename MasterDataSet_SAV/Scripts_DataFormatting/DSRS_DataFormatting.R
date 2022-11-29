@@ -57,9 +57,15 @@ sav_rake <- sav_rake_data %>%
   arrange(Date,Site,Latitude,Longitude) %>% 
   #just use a sequence of numbers with DSRS prefix
   mutate(
+    #add code for program
     program = "DSRS"
+    #create series of numbers for sample_ids
     ,number = seq(1:876)
-    ,sample_id = str_c(program,number)
+    #pad those numbers so they are all three digits
+    #note that this changes from integar to character
+    ,number_pad = str_pad(number,3,pad="0")
+    #create the sample IDs
+    ,sample_id = str_c(program,"_",number_pad)
     ) %>%
   glimpse()
 
@@ -151,19 +157,19 @@ species_level <- sav_rake %>%
   #only keep the needed columns
   select(sample_id,Total_Wet_Biomass_kg,Egeria_densa:Cabomba_caroliniana) %>% 
   #convert wide to long
-  pivot_longer(cols=(Egeria_densa:Cabomba_caroliniana),names_to = "species",values_to = "rake_cover_percent") %>% 
+  pivot_longer(cols=(Egeria_densa:Cabomba_caroliniana),names_to = "species",values_to = "species_rake_cover_percent") %>% 
   mutate(
     #create new column with estimated species specific biomass 
-    species_mass_fresh_estimated_g = (Total_Wet_Biomass_kg*1000) * (rake_cover_percent/100)
+    species_mass_fresh_estimated_g = (Total_Wet_Biomass_kg*1000) * (species_rake_cover_percent/100)
     #create column that indicates whether a species was present in a sample
-    ,species_incidence = case_when(rake_cover_percent==0~0,TRUE~1)
+    ,species_incidence = case_when(species_rake_cover_percent==0~0,TRUE~1)
     ) %>% 
   #add the species name abbrev.
   left_join(sav_taxonomy) %>% 
   #automatically clean column name format
   clean_names() %>%
   #only keep the needed columns and rename code as species
-  select(sample_id,species_code,species_incidence,rake_cover_percent,species_mass_fresh_estimated_g)
+  select(sample_id,species_code,species_incidence,species_rake_cover_percent,species_mass_fresh_estimated_g)
 
 #look for cases in which names didn't join properly (ie, code = NA)
 #name_na <- species_level %>% 
