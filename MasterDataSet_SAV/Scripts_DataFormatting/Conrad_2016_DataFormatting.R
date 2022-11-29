@@ -30,6 +30,7 @@ library(readxl) #read excel files
 library(janitor) #clean up column names
 library(sf) #convert GPS coordinate units
 library(deltamapr) #Sam's package with delta base layers
+library(lubridate) #formatting dates
 
 # Read in the data----------------------------------------------
 
@@ -48,20 +49,20 @@ taxonomy <- read_csv("./Data_Formatted/taxonomy_all.csv") %>%
 #range(conrad$gps_date) #"2008-10-07 UTC" "2010-10-18 UTC"
 
 #look at comment column
-comments <- conrad %>% 
-  drop_na(comment)
-unique(conrad$comment)
+#comments <- conrad %>% 
+#  drop_na(comment)
+#unique(conrad$comment)
 #looks like comments didn't get read in
 #the few comments in the data set note occasions in which there is no biomass data
 #these are generally obvious in the data set even without comments (NA instead of zero for mass)
 
 #explore depth data
-hist(as.numeric(conrad$depth))
-range(as.numeric(conrad$depth),na.rm = T) #0.1 14.8
-#rake handle is only 4.8 m long so exclude any depth measurements over 4.8 m
+#hist(as.numeric(conrad$depth))
+#range(as.numeric(conrad$depth),na.rm = T) #0.1 14.8
+#rake handle is only 4.8 m long so exclude any depth measurements over 4.8 m; did this in code below
 
 #look at species richness
-hist(conrad$spp_rich)
+#hist(conrad$spp_rich)
 
 #start formatting
 cleaner <- conrad %>% 
@@ -84,6 +85,7 @@ cleaner <- conrad %>%
   select(
     rake_id:easting
     ,sav_incidence
+    ,sav_mass_fresh_g = total_fw
     ,depth:sample
     ,egde:stfi_dw
   ) %>% 
@@ -130,54 +132,54 @@ long <- list(pa,wet,dry) %>%
   glimpse()
 
 #look at NAs for fresh biomass
-nsav_f<- long %>% 
-  filter(sample=="no-no SAV" & is.na(species_mass_fresh_g)) 
+#nsav_f<- long %>% 
+#  filter(sample=="no-no SAV" & is.na(species_mass_fresh_g)) 
 #9 NAs; all from WOO_1_061410_R4
 
 #look at NAs for dry biomass
-nsav_d<- long %>% 
-  filter(sample=="no-no SAV" & is.na(species_mass_dry_estimated_g)) 
+#nsav_d<- long %>% 
+#  filter(sample=="no-no SAV" & is.na(species_mass_dry_estimated_g)) 
 #9 NAs; all from WOO_1_061410_R4
 #WOO_1_061410_R4: needs NAs changed to zeros for fresh and dry
 #this is done in code below
 
 #look at pa for all samples 
-sav_pa<- long %>% 
-  filter(is.na(pa)) 
-unique(sav_pa$rake_id)
+#sav_pa<- long %>% 
+#  filter(is.na(pa)) 
+#unique(sav_pa$rake_id)
 #"WAR_1_060909_R4" 
 #NA for pa should be converted to zero
 #done in code below
 
 #look at fresh biomass for all samples
-sav_f<- long %>% 
-  filter(is.na(species_mass_fresh_g)) 
-unique(sav_f$rake_id) #24 samples
+#sav_f<- long %>% 
+#  filter(is.na(species_mass_fresh_g)) 
+#unique(sav_f$rake_id) #24 samples
 #20 samples from WOO_1 and VIC_1 6/14/2010, all but one of which should be NAs for wet and dry mass
 #exception: WOO_1_061410_R4 is a no SAV sample so we know mass is zeros for all species
 #plus "DIS_2_101209_R7": one NA that should be a zero
 #plus "BIG_1_102009_R3": one NA that should be a zero 
 
 #look at dry biomass for all samples
-sav_d<- long %>% 
-  filter(is.na(species_mass_dry_estimated_g)) 
-unique(sav_d$rake_id) #22 samples
+#sav_d<- long %>% 
+#  filter(is.na(species_mass_dry_estimated_g)) 
+#unique(sav_d$rake_id) #22 samples
 #20 samples from WOO_1 and VIC_1 6/14/2010, all but one of which should be NAs for wet and dry mass
 #exception: WOO_1_061410_R4 is a no SAV sample so we know mass is zeros for all species
 
 #look at cases of missing GPS coordinates
-lost <- long %>% 
-  filter(is.na(easting)|is.na(northing))
-lost_samp<-unique(lost$rake_id) #284 samples are missing coordinates
-lost_date<-unique(lost$gps_date) #all samples from 9 dates in Oct 2010 
+#lost <- long %>% 
+#  filter(is.na(easting)|is.na(northing))
+#lost_samp<-unique(lost$rake_id) #284 samples are missing coordinates
+#lost_date<-unique(lost$gps_date) #all samples from 9 dates in Oct 2010 
 #this issue is noted in original metadata for this data set
 
 #samples are generally taken at the same rake numbers each date,
 #so maybe we can copy coordinates from other dates
 
 #are there samples with missing dates? probably not
-miss_date <- long %>% 
-  filter(is.na(gps_date))
+#miss_date <- long %>% 
+#  filter(is.na(gps_date))
 #no missing dates
 
 #change species nicknames to latin names
@@ -243,7 +245,7 @@ long_cleaner <- long %>%
          longitude_wgs84 = unlist(map(geometry,1))) %>% 
   #drop the geometry column
   st_set_geometry(NULL) %>% 
-  #add species codes to replace species
+  #add standardized species codes to replace species
   left_join(taxonomy) %>% 
   #reorder columns
   select("program"
@@ -254,6 +256,7 @@ long_cleaner <- long %>%
          , "longitude_wgs84"
          , "sample_date"
          ,"sav_incidence"
+         ,"sav_mass_fresh_g"
          , "species_code"
          #probably don't need "species_incidence" now
          #this info should be captured by 0 or NA
