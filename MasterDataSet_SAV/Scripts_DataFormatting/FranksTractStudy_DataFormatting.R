@@ -348,7 +348,7 @@ most_cleaner <- most %>%
     sav_incidence = case_when(sav_tot > 0 ~ 1, 
                         sav_tot == 0 ~ 0)
     #add a sample ID column by creating string with program abbrev., station id, and date
-    ,sample_id = str_c("FRK_",station,"_",date)
+    ,sample_id = str_c("FRANKS","_",station,"_",date)
     )  %>% 
   #convert data frame from wide to long
   pivot_longer(all_of(sav_col), names_to = "species", values_to = "rake_coverage") %>% 
@@ -440,7 +440,7 @@ final <- most_cleaner %>%
   mutate(
     #change a single case of rake_coverage_ordinal from"0.01" to "1"
     #this had been typed into original excel file as "1%"
-    rake_cover_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)
+    species_rake_cover_ordinal = ifelse(rake_coverage == 0.01, 1, rake_coverage)
     ) %>% 
   #add columns with program specific info
   add_column("program" = "FRANKS"
@@ -463,7 +463,7 @@ final <- most_cleaner %>%
          ,sav_incidence
          ,species_code
          ,species_incidence
-         ,rake_cover_ordinal
+         ,species_rake_cover_ordinal
   )
 
 
@@ -471,7 +471,7 @@ final <- most_cleaner %>%
 #sum rake scores within samples and filter to show which sum to zero
 no_sav <- final %>% 
   group_by(station, sample_date) %>% 
-  summarize(sav_tot = sum(rake_cover_ordinal)) %>% 
+  summarize(sav_tot = sum(species_rake_cover_ordinal)) %>% 
   filter(sav_tot ==0) %>% 
   arrange(sample_date,station)
 #32 samples 
