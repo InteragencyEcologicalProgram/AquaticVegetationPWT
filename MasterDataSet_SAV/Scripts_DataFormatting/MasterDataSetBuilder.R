@@ -38,13 +38,14 @@ data_all_ord <- data_all %>%
          ,latitude_wgs84
          ,longitude_wgs84
          ,sample_date
-         ,water_depth_m
+         #,sample_time_pdt
+         #,water_depth_m
          ,sav_incidence
          ,sav_mass_fresh_g     
          ,species_code
          ,species_incidence
-         ,rake_cover_percent
-         ,rake_cover_ordinal
+         ,species_rake_cover_percent
+         ,species_rake_cover_ordinal
          ,species_mass_fresh_g
          ,species_mass_fresh_estimated_g
          ,species_mass_dry_estimated_g
@@ -55,4 +56,13 @@ data_all_ord <- data_all %>%
 
 #write integrated data set file
 #write_csv(data_all_ord,"./Data_Formatted/sav_integrated_dataset.csv")
+
+
+#Summary stats --------------------------
+
+#how many samples in data set?
+samples <- unique(data_all_ord$sample_id) #6,572 samples from four surveys
+
+
+
 
