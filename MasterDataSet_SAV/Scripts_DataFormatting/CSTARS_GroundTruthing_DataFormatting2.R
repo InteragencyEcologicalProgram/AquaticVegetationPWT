@@ -70,6 +70,10 @@ sav_rake_data <- read_csv("https://portal.edirepository.org/nis/dataviewer?packa
   clean_names()
 #glimpse(sav_rake_data)
 
+#read in taxonomy data set to get species codes
+taxonomy <- read_csv("./Data_Formatted/taxonomy_all.csv") %>% 
+  select(species,species_code)
+
 #initial data exploration------------
 
 #look at date range
@@ -118,6 +122,8 @@ sav_rake <- sav_rake_data %>%
     ,station = case_when(orig_fid==4148 & pat_len=="M (5-10m)" ~ 4148.1
                          ,orig_fid==4148 & pat_len=="XL (>15m)"~ 4148.2
                          , TRUE ~ orig_fid)
+    #add program prefix to sample number
+    ,sample_id = str_c("CSTARS_",station)
     #to get rid of negative rake value, just use absolute value of all numbers
     ,rake_teeth = abs(rk_tth)
   )
@@ -139,23 +145,23 @@ sav_rake <- sav_rake_data %>%
 #create taxonomy table-------------
 #include six letter spp codes and latin names
 
-taxonomy <- as_tibble(
-  cbind(
-    "code" = c("EGEDEN","CERDEM","MYRSPI","POTNOD","POTCRI","STUPEC","CABCAR","ELOCAN","POTRIC"
-               ,"NAJGUA","POTPUS","ECHBER","VALAUS","HETDUB","FILALG")
-    ,"species" = c("Egeria_densa","Ceratophyllum_demersum","Myriophyllum_spicatum"
-                   ,"Potamogeton_nodosus","Potamogeton_crispus","Stuckenia_pectinata"
-                   ,"Cabomba_caroliniana","Elodea_canadensis","Potamogeton_richardsonii"
-                   ,"Najas_guadalupensis","Potamogeton_pusillus", "Echinodorus_berteroi"
-                   ,"Vallisneria_australis","Heteranthera_dubia","filamentous_algae")
-    ,"native" = c("n","n","n","y","n","y","n","y","y","y","y","y","n","y","y")
-  )
-  )
+#taxonomy <- as_tibble(
+#  cbind(
+#    "code" = c("EGEDEN","CERDEM","MYRSPI","POTNOD","POTCRI","STUPEC","CABCAR","ELOCAN","POTRIC"
+#               ,"NAJGUA","POTPUS","ECHBER","VALAUS","HETDUB","FILALG")
+#    ,"species" = c("Egeria_densa","Ceratophyllum_demersum","Myriophyllum_spicatum"
+#                   ,"Potamogeton_nodosus","Potamogeton_crispus","Stuckenia_pectinata"
+#                   ,"Cabomba_caroliniana","Elodea_canadensis","Potamogeton_richardsonii"
+#                   ,"Najas_guadalupensis","Potamogeton_pusillus", "Echinodorus_berteroi"
+#                   ,"Vallisneria_australis","Heteranthera_dubia","filamentous_algae")
+#    ,"native" = c("n","n","n","y","n","y","n","y","y","y","y","y","n","y","y")
+#  )
+#  )
 
-taxonomy_final <- taxonomy %>% 
-  separate(species, into = (c("genus","specific_epithet")),sep ="_",remove=F) %>% 
-  arrange(species) %>% 
-  select(code,genus,specific_epithet,species,native)
+#taxonomy_final <- taxonomy %>% 
+#  separate(species, into = (c("genus","specific_epithet")),sep ="_",remove=F) %>% 
+#  arrange(species) %>% 
+#  select(code,genus,specific_epithet,species,native)
 
 #write_csv(taxonomy_final,"Data_Formatted/cstars_taxonomy.csv")
 
@@ -164,9 +170,9 @@ taxonomy_final <- taxonomy %>%
 
 rake_format <- sav_rake %>% 
   #only keep spp level columns and rename them as needed
-  select(station 
-         ,date = date2
-         ,time_pdt = time #still need to confirm time zone
+  select(sample_id 
+         ,sample_date = date2
+         ,sample_time_pdt = time #still need to confirm time zone
          ,latitude_wgs84 = latitude
          ,longitude_wgs84 = longitude
          ,rake_teeth
@@ -280,28 +286,34 @@ rake_long <- rake_format %>%
     ,species_incidence = case_when(rake_prop > 0 ~ 1, 
                                         rake_prop == 0 ~ 0)
     #format rake teeth column; sav_rake_prop is probably clearer name
-    ,sav_rake_prop = num(rake_teeth,digits=2)
+    #,sav_rake_prop = num(rake_teeth,digits=2)
     #rename column with species data too
-    ,species_prop = num(rake_prop,digits=2)
+    #,species_prop = num(rake_prop,digits=2)
+    #decided to use a single column with % of rake covered by each species
+    #instead of separate columns for total sav prop and spp prop
+    #I think this is how FRP does it too
+    ,species_rake_cover_percent = (rake_teeth*rake_prop)*100
+    
          ) %>% 
   #add a couple columns 
   add_column(program = "CSTARS"
-             ,survey_method = "rake_weighted") %>% 
+             ,sample_method = "rake_rope") %>% 
   #reorder columns
   select(program
-         ,station
+         ,sample_method
+         ,sample_id
          ,latitude_wgs84
          ,longitude_wgs84
-         ,date
-         ,time_pdt
-         ,survey_method
+         ,sample_date
+         ,sample_time_pdt
          ,sav_incidence
-         ,sav_rake_prop
-         ,species
+         #,sav_rake_prop
+         ,species_code = species
          ,species_incidence
-         ,species_prop
+         #,species_prop
+         ,species_rake_cover_percent
          ) %>% 
-  arrange(station,species) %>% 
+  arrange(sample_id,species_code) %>% 
   glimpse()
 
 #final check for missing data
@@ -311,6 +323,8 @@ rake_long <- rake_format %>%
 
 #export final file
 #write_csv(rake_long,"Data_Formatted/cstars_groundtruthing_rake.csv")
+#write_csv(rake_long,"Data_Formatted/cstars_flatfile.csv")
+
 
 #examine samples with no SAV
 #water <- rake_long %>% 
@@ -333,9 +347,9 @@ rake_long <- rake_format %>%
 #format the patch level data----------------------
 
 patch_format <- sav_rake %>% 
-  select(station 
-         ,date = date2
-         ,time_pdt = time 
+  select(sample_id 
+         ,sample_date = date2
+         ,sample_time_pdt = time 
          ,latitude_wgs84 = latitude
          ,longitude_wgs84 = longitude
          ,patch_length_m = pat_len
@@ -359,11 +373,11 @@ patch_format <- sav_rake %>%
   add_column(program = "CSTARS")  %>% 
   #drop unneeded columns and reorder columns
   select(program
-         ,station
+         ,sample_id
          ,latitude_wgs84
          ,longitude_wgs84
-         ,date
-         ,time_pdt
+         ,sample_date
+         ,sample_time_pdt
          ,preassigned
          ,depth_to_sav_m
          ,patch_length_m
@@ -373,7 +387,7 @@ patch_format <- sav_rake %>%
          ,secchi_m  
          ,secchi_at_bottom = sc_at_bot
          ) %>% 
-  arrange(station) %>% 
+  arrange(sample_id) %>% 
   glimpse()
 
 #export patch table
