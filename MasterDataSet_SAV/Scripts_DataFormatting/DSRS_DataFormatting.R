@@ -214,7 +214,7 @@ sp_prev <- species_level %>%
   #filter out cases of spp absences
   filter(species_incidence!=0) %>% 
   group_by(species_code) %>% 
-  summarize(dsrs = sum(species_incidence))
+  summarize(DSRS = sum(species_incidence))
 
 #export table
 #write_csv(sp_prev,"./Data_Formatted/dsrs_spp_summary.csv")
