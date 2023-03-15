@@ -8,6 +8,9 @@
 
 # To do list--------------
 
+#decide if some of the rare taxa were actually observed or added to "pad" native spp richness
+#HETDUB, POTZOS,NITELL, POTNOD, POTPUS (the last two are believable)
+
 #still don't have full set of coordinates for 2015 (missing 100 or 50%)
 
 # Survey metadata------------------
@@ -367,6 +370,7 @@ most_cleaner <- most %>%
 #some or all of these taxa might have been simply observed in water rather than collected on rake
 #decided to categorize these as "visual" rather than "rake-weighted" survey method
 #drop the hybrid note because this 2019 sample was not confirmed via genetics
+
 #9/28/2022: decided to just exclude "other" taxa from final data set
 #because visual species were not consistently recorded and also there is reason to believe
 #at least some of these were not actually observed but rather added to inflate the count of native
@@ -479,6 +483,19 @@ no_sav <- final %>%
 
 #version with some missing coordinates for 2015
 #write_csv(final,"./Data_Formatted/franks_flatfile.csv")
+
+#Create summary of number of samples in which each species was present-------------
+#will use this to indicate which taxa were found in this survey
+
+sp_prev <- final %>% 
+  #filter out cases of spp absences
+  filter(species_incidence!=0) %>% 
+  group_by(species_code) %>% 
+  summarize(FRANKS = sum(species_incidence))
+
+#export table
+#write_csv(sp_prev,"./Data_Formatted/franks_spp_summary.csv") 
+
 
 #create version with 2015 samples that are missing coordinates removed
 final_coords_complete <- final %>% 
