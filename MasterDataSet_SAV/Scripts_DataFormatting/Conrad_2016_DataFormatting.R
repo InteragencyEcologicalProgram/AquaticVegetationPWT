@@ -59,20 +59,23 @@ taxonomy <- read_csv("./Data_Formatted/taxonomy_all.csv") %>%
 #explore depth data
 #hist(as.numeric(conrad$depth))
 #range(as.numeric(conrad$depth),na.rm = T) #0.1 14.8
-#rake handle is only 4.8 m long so exclude any depth measurements over 4.8 m; did this in code below
+#rake handle is only 4.8 m long so maybe exclude any depth measurements over 4.8 m
+#maybe the high values were in feet? 14.8 could also be a typo for 4.8 m
+#don't include depth in integrated sav data set, so don't filter these samples out for now
 
 #look at species richness
 #hist(conrad$spp_rich)
 
 #start formatting
 cleaner <- conrad %>% 
-  #drop samples with no-no rake
+  #drop samples with no-no rake (couldn't reach bottom with rake)
   #use spp richness column to make sure no samples with SAV got mislabeled as no-no rake
   #the extra code recovers one mislabeled sample
-  filter(!(sample=="no-no rake" & (spp_rich==0 | is.na(spp_rich) )))%>% 
+  filter(!(sample=="no-no rake" & (spp_rich==0 | is.na(spp_rich) ))) %>% 
   #drop cases where spp richness is NA because it indicates no presence/absence data for sample
+  #could either be mislabeled no-no SAV or yes samples missing species composition
   #note that sample type "yes" and "no-no SAV" aren't perfectly accurate so ignore them
-  filter(!(is.na(spp_rich))) %>% 
+  filter(!(is.na(spp_rich)))  %>% 
   mutate(
     #add sav incidence column
     "sav_incidence" = case_when(spp_rich==0~0,spp_rich>0~1)
@@ -80,13 +83,16 @@ cleaner <- conrad %>%
     ,across(c("depth"), as.numeric)
     ) %>% 
   #drop any cases in which depth is above the rake handle length (max sampling depth)
-  filter(depth < 4.8) %>% 
+  #actually this drops a lot of samples and we don't include depth in integrated data set
+  #so don't filter these out for now
+  #filter(depth < 4.8) 
   #dropped unneeded columns
   select(
     rake_id:easting
     ,sav_incidence
     ,sav_mass_fresh_g = total_fw
-    ,depth:sample
+    #,depth
+    ,sample
     ,egde:stfi_dw
   ) %>% 
   glimpse()
@@ -196,7 +202,7 @@ names(replacements) <- c(tr$target)
 
 #make corrections based on data exploration above and do some more formatting/cleaning
 long_cleaner <- long %>% 
-  #one sample with NA for pa was were determined to be zero so convert from NA
+  #one sample with NA for pa was determined to be zero so convert from NA
   replace_na(list(pa=0)) %>% 
   #fresh and dry mass for this sample should be zeros instead of NAs (no SAV present)
   mutate(across(.cols = c(species_mass_fresh_g,species_mass_dry_estimated_g),
@@ -218,10 +224,12 @@ long_cleaner <- long %>%
   select(-c("sample","species")) %>% 
   #drop rows with missing GPS coordinates
   #see if there is a logical way to fill in some of these
-  filter(!is.na(easting) & !is.na(northing)) %>% 
+  #actually let's leave these in; at least we know which site they're from
+  #for some purposes the coordinates might not be critical
+  #filter(!is.na(easting) & !is.na(northing)) %>% 
   #rename some columns 
   rename("sample_id"="rake_id"
-         ,"water_depth_m" = "depth"
+         #,"water_depth_m" = "depth"
          ,"species_incidence"="pa"
          ,"species"="species1") %>% 
   #add columns that identify these data as part of this survey
@@ -232,12 +240,12 @@ long_cleaner <- long %>%
     #change datetime to date
     "sample_date" = as_date(gps_date)
     #add density columns; divides mass by area sampled by rake (0.101 m^2)
-    ,"species_density_fresh_g_m^2"=round((species_mass_fresh_g/0.101),2)
-    ,"species_density_dry_estimated_g_m^2"=round((species_mass_dry_estimated_g/0.101),2)
+    ,"species_density_fresh_g_m2"=round((species_mass_fresh_g/0.101),2)
+    ,"species_density_dry_estimated_g_m2"=round((species_mass_dry_estimated_g/0.101),2)
          ) %>% 
   #change CRS of sample coordinates
   #specify the CRS of original coordinate: UTM NAD 83 (Zone 10N) (EPSG = 26910)
-  st_as_sf(coords = c("easting", "northing"), crs = 26910) %>%
+  st_as_sf(coords = c("easting", "northing"), crs = 26910,na.fail = F) %>%
   #then transform to WGS84
   st_transform(4326) %>% 
   #then convert from geometry to columns
@@ -264,14 +272,28 @@ long_cleaner <- long %>%
          , "species_incidence" 
          , "species_mass_fresh_g"
          , "species_mass_dry_estimated_g"
-         ,"species_density_fresh_g_m^2"
-         ,"species_density_dry_estimated_g_m^2"
-         , "water_depth_m"
+         ,"species_density_fresh_g_m2"
+         ,"species_density_dry_estimated_g_m2"
+         #, "water_depth_m"
          ) %>% 
   glimpse()
 
 #write the formatted dataset 
 #write_csv(long_cleaner,file = "./Data_Formatted/bass_flatfile.csv")
+
+#Create summary of number of samples in which each species was present-------------
+#just need to export the list of taxa
+#will use this to indicate which taxa were found in this survey
+
+sp_prev <- long_cleaner %>% 
+  #filter out cases of spp absences
+  filter(species_incidence!=0) %>% 
+  group_by(species_code) %>% 
+  summarize(BASS = sum(species_incidence))
+
+#export table
+#write_csv(sp_prev,"./Data_Formatted/bass_spp_summary.csv") 
+
 
 
 #map all sampling locations-----------------------
