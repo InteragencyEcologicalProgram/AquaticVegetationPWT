@@ -142,9 +142,16 @@ sample_level <- sav_rake %>%
     ,sav_mass_fresh_g = total_wet_biomass_kg*1000
     #create column that indicates whether there was SAV in a sample
     ,sav_incidence = case_when(sav_mass_fresh_g==0~0,TRUE~1)
-         ) %>% 
+    ) %>% 
   #only keep needed columns
-  select(site_code=site,sample_id,sample_method,sample_date=date,latitude_wgs84=latitude,longitude_wgs84=longitude,sav_incidence,sav_mass_fresh_g)
+  select(site_code=site
+         ,sample_id
+         ,sample_method
+         ,sample_date=date
+         ,latitude_wgs84=latitude
+         ,longitude_wgs84=longitude
+         ,sav_incidence
+         ,sav_mass_fresh_g)
 
 #export table
 #write_csv(sample_level,"./Data_Formatted/dsrs_sample.csv")
@@ -163,18 +170,38 @@ species_level <- sav_rake %>%
     species_mass_fresh_estimated_g = (Total_Wet_Biomass_kg*1000) * (species_rake_cover_percent/100)
     #create column that indicates whether a species was present in a sample
     ,species_incidence = case_when(species_rake_cover_percent==0~0,TRUE~1)
-    ) %>% 
+    #create column with ordinal scores for percent rake cover
+    ,species_rake_cover_ordinal = case_when(species_rake_cover_percent ==0 ~ 0
+                                            ,species_rake_cover_percent >0 & species_rake_cover_percent<= 19~1
+                                            ,species_rake_cover_percent >19 & species_rake_cover_percent<= 39~2
+                                            ,species_rake_cover_percent >39 & species_rake_cover_percent<= 59~3
+                                            ,species_rake_cover_percent >59 & species_rake_cover_percent<=79~4
+                                            ,species_rake_cover_percent > 79 ~ 5
+                                            )
+        ) %>% 
   #add the species name abbrev.
   left_join(sav_taxonomy) %>% 
   #automatically clean column name format
   clean_names() %>%
   #only keep the needed columns and rename code as species
-  select(sample_id,species_code,species_incidence,species_rake_cover_percent,species_mass_fresh_estimated_g)
+  select(sample_id
+         ,species_code
+         ,species_incidence
+         ,species_rake_cover_percent
+         ,species_rake_cover_ordinal
+         ,species_mass_fresh_estimated_g
+         )
 
 #look for cases in which names didn't join properly (ie, code = NA)
 #name_na <- species_level %>% 
 #  filter(is.na(code))
 #nope, joining was done correctly for all rows
+
+#make sure rake percent and rake ordinal are correctly matched
+#per_ord <- species_level %>% 
+ # distinct(species_rake_cover_percent,species_rake_cover_ordinal) %>% 
+  #arrange(species_rake_cover_percent,species_rake_cover_ordinal)
+#yep, looks good
 
 #export table
 #write_csv(species_level,"./Data_Formatted/dsrs_sample_species.csv")
