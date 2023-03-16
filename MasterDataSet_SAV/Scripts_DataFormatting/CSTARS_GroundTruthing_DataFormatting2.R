@@ -23,7 +23,7 @@
 #consider adding the program as a prefix to station to make sure it is unique
 #when combined with other data sets
 
-#need to confirm time zone (PDT vs PST)
+#need to confirm time zone (PDT vs PST), though currently we don't include time in integrated data set
 
 #consider changing sago species to just genus
 
@@ -293,7 +293,13 @@ rake_long <- rake_format %>%
     #instead of separate columns for total sav prop and spp prop
     #I think this is how FRP does it too
     ,species_rake_cover_percent = (rake_teeth*rake_prop)*100
-    
+    ,species_rake_cover_ordinal = case_when(species_rake_cover_percent ==0 ~ 0
+                                            ,species_rake_cover_percent >0 & species_rake_cover_percent<= 19~1
+                                            ,species_rake_cover_percent >19 & species_rake_cover_percent<= 39~2
+                                            ,species_rake_cover_percent >39 & species_rake_cover_percent<= 59~3
+                                            ,species_rake_cover_percent >59 & species_rake_cover_percent<=79~4
+                                            ,species_rake_cover_percent > 79 ~ 5
+    )
          ) %>% 
   #add a couple columns 
   add_column(program = "CSTARS"
@@ -305,13 +311,14 @@ rake_long <- rake_format %>%
          ,latitude_wgs84
          ,longitude_wgs84
          ,sample_date
-         ,sample_time_pdt
+         #,sample_time_pdt
          ,sav_incidence
          #,sav_rake_prop
          ,species_code = species
          ,species_incidence
          #,species_prop
          ,species_rake_cover_percent
+         ,species_rake_cover_ordinal
          ) %>% 
   arrange(sample_id,species_code) %>% 
   glimpse()
@@ -322,8 +329,19 @@ rake_long <- rake_format %>%
 #just some missing times, which is fine
 
 #export final file
-#write_csv(rake_long,"Data_Formatted/cstars_groundtruthing_rake.csv")
 #write_csv(rake_long,"Data_Formatted/cstars_flatfile.csv")
+
+#Create summary of number of samples in which each species was present-------------
+#will use this to indicate which taxa were found in this survey
+
+sp_prev <- rake_long %>% 
+  #filter out cases of spp absences
+  filter(species_incidence!=0) %>% 
+  group_by(species_code) %>% 
+  summarize(CSTARS = sum(species_incidence))
+
+#export table
+#write_csv(sp_prev,"./Data_Formatted/cstars_spp_summary.csv") 
 
 
 #examine samples with no SAV
