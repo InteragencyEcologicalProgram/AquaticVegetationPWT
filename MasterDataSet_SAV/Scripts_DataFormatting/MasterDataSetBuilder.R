@@ -1,7 +1,7 @@
 #Aquatic Vegetation Project Work Team
-#Master data set
+#Integrated data set
 #Submersed aquatic vegetation
-#Script that combines all formatted data sets into master data set
+#Script that combines all formatted data sets 
 
 #datasets included so far:
 #DSRS
@@ -13,14 +13,13 @@
 #nicholas.rasmussen@water.ca.gov
 
 #to do list
-#still need to tweak column names, format, and order to maximize consistency among data sets
 
 #required packages
 library(tidyverse)
 library(sf)
 library(deltamapr)
 
-#import and merge the example csv files
+#import and merge the csv files
 #https://statisticsglobe.com/merge-csv-files-in-r
 data_all <- list.files(path = "./Data_Formatted/",     # Identify all csv files in folder
                        pattern = "*flatfile.csv", full.names = TRUE) %>% 
@@ -44,7 +43,12 @@ data_all_ord <- data_all %>%
          #,sample_time_pdt
          #,water_depth_m
          ,sav_incidence
-         ,sav_mass_fresh_g     
+         #can put this in species level table
+         #repeats value for whole sample for every spp in sample
+         #eventually create a sample level table to add this
+         #for now, can get this value by adding up mass of spp in samples
+         #relevant for BASS and DSRS
+         #,sav_mass_fresh_g     
          ,species_code
          ,species_incidence
          ,species_rake_cover_percent
@@ -52,13 +56,13 @@ data_all_ord <- data_all %>%
          ,species_mass_fresh_g
          ,species_mass_fresh_estimated_g
          ,species_mass_dry_estimated_g
-         ,`species_density_fresh_g_m^2`
-         ,`species_density_dry_estimated_g_m^2`
+         ,`species_density_fresh_g_m2`
+         ,`species_density_dry_estimated_g_m2`
          ) %>% 
   glimpse()
 
 #write integrated data set file
-#write_csv(data_all_ord,"./Data_Formatted/sav_integrated_dataset.csv")
+#write_csv(data_all_ord,"./Data_Formatted/sav_integrated_dataset_2023-03-16.csv")
 
 
 #Summary stats --------------------------
@@ -84,6 +88,20 @@ species <- data_all_ord %>%
   arrange(species_code) %>% 
   pull(species_code)
 #19 species
+
+#look at names of sites
+sites <- data_all_ord %>% 
+  distinct(program, site)
+
+#look at station names
+stations <- data_all_ord %>% 
+  distinct(program, station)
+
+#number of samples by program
+prog_samp <- data_all_ord %>% 
+  distinct(program, sample_id) %>% 
+  group_by(program) %>% 
+  count()
 
 #Map------------
 
