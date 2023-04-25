@@ -11,6 +11,8 @@
 
 #Nick to do list-------
 
+#Shruti says don't include algae in the 100% of rake cover. It's a separate thing. She says just ignore the algae field entirely
+
 #decide whether to keep either of these columns
 #Location is where the boat was in relation to the patch - "center" meaning - on the patch
 #"alongside" meaning - right next to the patch; 
@@ -45,6 +47,11 @@
 #fix the samples where it is indicated that SAV was present on the rake
 #but there's no corresponding spp level data
 #for now, I will drop these from the data set
+#as of 4/21/2023, Shruti removed these samples from the updated EDI data set
+#she said 100% was default for cover, so those missing spp composition were actually
+#empty samples that didn't have cover changed to 0%
+#so I was right to simply drop those, since this data set does not currently 
+#consistently include the empty samples
 
 #fix samples in which spp composition number don't add roughly to either 
 #zero or one
