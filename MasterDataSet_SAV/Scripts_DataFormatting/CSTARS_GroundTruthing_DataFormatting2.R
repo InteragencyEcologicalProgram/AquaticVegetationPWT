@@ -11,6 +11,8 @@
 
 #Nick to do list-------
 
+#as of 4/21/2023, Shruti published a new version of the data set, so work off that version going forward
+
 #Shruti says don't include algae in the 100% of rake cover. It's a separate thing. She says just ignore the algae field entirely
 
 #decide whether to keep either of these columns
